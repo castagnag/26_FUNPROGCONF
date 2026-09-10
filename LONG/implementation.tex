@@ -1,0 +1,145 @@
+
+\begin{frame}
+\frametitle{Outline} 
+\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+\frametitle{Status of the Integration}\vspace{-4mm}
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item Integration started in version 1.17 of Elixir, with type structures and gradual typing
+\item version 1.18 covered more types and type-checked function calls performing type
+inference for patterns and return types by refined guard analysis  
+\item The current v1.19 
+covers all language constructs and includes basic, atom, tuple, list, map, and
+function types, as well as the typing of \textit{protocols} (akin to type classes in Haskell). The forthcoming 1.20 (rc4) covers all the inference for functions. \textcolor{darkslateblue}{No type annotations and no parametric polymorphism, yet}.
+\end{itemize}
+\pause\smallskip
+
+\small
+\begin{tabular}{|l|r|r|r|r|r|r|}
+\hline\rowcolor{violet2}
+Codebase & \multicolumn{1}{c|}{LoC} & \multicolumn{1}{c|}{Files} & Modules & \makecell{Type Checking\\ Time} & \makecell{Total Compilation\\ Time} & \multicolumn{1}{c|}{\%}\\[-1pt]
+\hline
+Remote & $>$1,000,000 & $>$10,000 & 18,059 & 11.116 s & 707.598 s  & 1.6\\[-1.5pt]
+\rowcolor{violet1}
+Livebook & 61093 & 254 & 299 & 0.177 s & 4.112 s&4.3\\[-1.5pt]
+Credo & 29181 & 252 & 264 & 0.059 s & 1.305 s &4.5\\[-1.5pt]
+\rowcolor{violet1}
+Phoenix &  21389& 71& 88 &  0.049 s& 0.525 s&9.3\\[-1.5pt]
+Hex & 15632 & 196 & 241 & 0.091 s & 1.339 s  &6.8\\[-1pt]
+
+\hline
+\end{tabular}\pause
+
+\bigskip
+\textbf{\textcolor{darkslateblue}{\large Discovered type errors in all of them}}   
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Status of the Integration}\vspace{-3mm}
+\begin{itemize}
+\item Very positive feedback from developers on versions 1.17 and 1.18
+\item No syntactic changes required to Elixir code was particularly appreciated
+\item Uncovered previously hidden errors without significant overhead
+\item Found issues in major projects: Phoenix, Livebook, Postgrex, and Flame that persisted undetected in production, sometimes for years
+\end{itemize}
+
+\bigskip\pause
+
+\begin{block}{Real-world Bug Discoveries}
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+\item \textbf{Phoenix}: Critical type mismatch in \code{String.to_atom/1} \hfill\small (deployed on 14,600+ websites)
+\item \textbf{Postgrex}: 15 lines of dead code removed
+\item \textbf{Flame}: 2 dead code paths found via guard analysis
+\item \textbf{Live-view}: 6 lines of dead code removed
+\item \textbf{Remote}: detected a critical type mismatch application\\ undetected by tests because in an error branch that is rarely executed.\vspace{-1mm}
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\mbox{Other Languages using (more or less) Semantic Subtyping:}}
+\begin{itemize}\setlength{\itemsep}{0pt}
+    \item CDuce (and currently its spin offs: SSTT and MLsem)
+    \item Ballerina (by WSO2) uses semantic subtyping since its Swan Lake release
+    \item Luau (by Roblox)uses semantics subtyping when its syntactic subtyping fails.
+    \item R (Jan Vitek's group has being developing a type system for R based on semantic subtyping)
+    \item Julia developers affirm to have drawn inspiration from Semantic Subtyping for the type system.
+    \item Python (\textsf{ty}, the high-performance Python type checker developed by astral, uses semantic subtyping and several low-level data-structures and optimizations developed for Elixir to implement semantic types) 
+    \item Ethylizer (uses semantic subtyping type reconstruction to type-check unannotated Erlang code)
+    \item eqWAlizer (use semantic subtyping to type WhatsApp Erlang code)
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Future work}\vspace{-2mm}[In order of state of completion]
+
+\bigskip
+\textbf{\color{darkslateblue}Types for the Elixir Module System:}\\
+Currently, only the type \code{module()} is supported, while we want a finer-grained typing of functions manipulating modules:\vspace{-5mm}
+\begin{block}{\vspace{-25mm}}
+\begin{minted}{elixir}
+!\spec! (X: Stack[el=bool], sx: X.stack, Y: Stack[el=bool], sy: Y.stack) -> Y.stack
+def move(X, sx, Y, sy), do: Y.push(sy, X.top(sx))   
+\end{minted}
+\end{block}
+
+\bigskip
+\textbf{\color{darkslateblue}Record types comprehensions:}\\
+We want to type standard library functions that manipulate records with \emph{first-class} keys, such as \code{Map.intersect/2} and \code{Map.reject/2}.
+\definecolor{typeconstructorgreen}{rgb}{0.0, 0.5, 0.25}  % Nice green for type constructors
+\definecolor{keyvarblue}{rgb}{0.1, 0.3, 0.7}              % Nice blue for key variables
+\newcommand{\keyof}[1]{\textcolor{typeconstructorgreen}{\mathsf{keyof}}(#1)}
+\newcommand{\tvar}{\textcolor{keyvarblue}{\boldsymbol{\theta}}}
+\begin{tabular}{@{}l@{\;\;}l@{\;\;}l@{}}
+ \texttt{intersect/2}
+  & $(\alpha,\, \beta) \to \%\{\,\tvar \in \keyof{\alpha} \land \keyof{\beta} \mid \beta[\tvar]\,\}\quad\texttt{when } \alpha,\beta\texttt{:map()}$  \\[6pt]
+\texttt{reject/2}
+  & $(\alpha, ((\keyof{\alpha} \to \texttt{term}) \,\wedge\, ( \keyof{\alpha}\wedge\beta)\to\neg\texttt{truthy})) \to $\\
+  &\qquad\qquad\qquad\qquad
+     $\%\{\, \tvar\in \keyof{\alpha}\setminus\beta \mid \alpha[\tvar]\,\} \quad\texttt{when } \alpha\texttt{:map()}$\\[3pt]
+\end{tabular}
+\end{frame}
+\begin{frame}
+\bigskip
+\textbf{\color{darkslateblue}Types for processes and message passing:}
+Currently, only the type \code{pid()} is supported.
+
+We are working on typing processes with the set of messages they can receive and later, introduce Mailbox types, to ensure liveness properties.
+
+
+\bigskip
+\textbf{\color{darkslateblue}Tooling:} We are developing migration tools, IDEs, error messages, .... In particular, we are  feeding LLMs with automatic translations of Typespecs into Elixir Types together with the type errors they produce to improve the quality of LLM-generated type annotations and error messages.
+
+
+\bigskip
+\textbf{\color{darkslateblue}Implementation:}
+\begin{itemize}\setlength{\itemsep}{-2pt}
+\item v1.20 completion of inference for functions
+\item v1.21 first modification of the language: explicit type annotation for structs
+\item v1.22 \code{!\color{darkgreen}\$!}-prefixed  type annotations for functions
+\item later: polymorphic types, row polymorphism, polymorphic inference, ...
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+\frametitle{References}
+
+
+\textbf{\color{darkslateblue}On Elixir Typing:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item[[\,1\!\!]] G. Castagna, G. Duboc, and J. Valim: \textit{The Design Principles of the Elixir Type System}. The Art, Science, and Engineering of Programming, vol.8, n.2, 2024.
+    \item[[\,2\!\!]] G. Castagna and G. Duboc: \textit{Guard Analysis and Safe Erasure Gradual Typing: a Type System for Elixir}, 7, 2025. Submitted for publication (available on my web page).
+\end{itemize}
+
+
+\textbf{\color{darkslateblue}On Set-Theoretic types:}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item[[\,3\!\!]] G. Castagna: \textit{Programming with Union, Intersection, and Negation Types}. In \textit{The French School of Programming}, Springer, pag. 309―378, March, 2024. ISBN 978-3-031-34517-3. Preprint at \href{https://arxiv.org/abs/2111.03354}{arXiv:2111.03354}.
+\end{itemize}
+\end{frame}

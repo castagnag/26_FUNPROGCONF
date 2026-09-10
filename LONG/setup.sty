@@ -1,0 +1,796 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{setup}[2018/04/25 v0.1]
+\newcommand\smallnegskip{\vspace{-1.2mm}}
+\newcommand\mednegskip{\vspace{-2mm}}
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\let\Bbbk\relax
+%\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{pifont}
+%\usepackage{amssymb}
+%\usepackage{amsthm}
+\usepackage{alltt}
+%\usepackage{mathptmx}%removed if too many maths alphabets
+%\usepackage{calrsfs} %removed if too many maths alphabets
+\usepackage{bm}
+\usepackage{stmaryrd}
+\usepackage{mathpartir}
+\usepackage{color, colortbl}
+\usepackage{multicol}
+\usepackage{makecell}
+\usepackage{listings}
+\usepackage{fancyvrb}
+%\usepackage[shortlabels]{enumitem}
+\usepackage{tikz-cd}
+\usepackage{relsize}
+%\usepackage{adfarrows}
+
+% possible colors for type annotations
+\definecolor{violet1}{RGB}{246,242,247}
+\definecolor{violet2}{RGB}{226,226,242}
+\definecolor{commentgreen}{RGB}{2,112,10}
+\definecolor{eminence}{RGB}{108,48,130}
+\definecolor{weborange}{RGB}{255,165,0}
+\definecolor{frenchplum}{RGB}{129,20,83}
+\definecolor{bordeaux}{rgb}{0.5, 0, 0.13}
+\definecolor{newgreen}{RGB}{38, 162, 105}
+\definecolor{typeBlue}{RGB}{51, 102, 255}
+\definecolor{typeGreen}{RGB}{34, 139, 34}
+\definecolor{typePurple}{RGB}{147, 112, 219}
+\definecolor{typeOrange}{RGB}{255, 140, 0}
+\definecolor{typeBrique}{RGB}{184,55,55}
+\definecolor{typeGray}{RGB}{169,169,169}
+\definecolor{typeAqua}{RGB}{64, 224, 208}
+\definecolor{byzantium}{rgb}{0.44, 0.16, 0.39}
+\definecolor{darkblue}{rgb}{0,0.2,0.4}
+\definecolor{darkred}{rgb}{0.8,0.2,0.2}
+\definecolor{revision}{rgb}{.07,.63,.37}
+\definecolor{cadmiumgreen}{rgb}{0.0, 0.42, 0.24}
+\definecolor{darkslateblue}{rgb}{0.28, 0.24, 0.55}
+\definecolor{keyword}{rgb}{.69,0,.25}
+\definecolor{darkgreen}{rgb}{0,0.65,0.08} 
+\definecolor{greenkey}{rgb}{0, 0.5, 0}
+% pick one color for type annotations
+\newcommand{\pickedColor}{typePurple}
+%%%%% here ^^^ %%%%%%%%%%%%%%
+\DefineVerbatimEnvironment{coloredverbatim}{Verbatim}{
+  fontfamily=tt,
+  fontsize=\small,
+  commandchars=\\\{\},
+  formatcom=\color{\pickedColor}
+}
+\newcommand{\spec}{\textcolor{\pickedColor}{\$}}
+\newcommand{\po}{(}
+\newcommand{\pc}{)}
+\newcommand{\arr}{\textcolor{\pickedColor}{->}}
+\newcommand{\andd}{\textcolor{\pickedColor}{and}}
+\newcommand{\orr}{\textcolor{\pickedColor}{or}}
+\newcommand{\when}{\textcolor{\pickedColor}{when}}
+\newcommand{\vara}{\textcolor{\pickedColor}{a}}
+\newcommand{\varb}{\textcolor{\pickedColor}{b}}
+
+\newcommand{\otherColor}{typeOrange}
+\newcommand{\oand}{\textcolor{\otherColor}{and}}
+\newcommand{\oor}{\textcolor{\otherColor}{or}}
+\newcommand{\owhen}{\textcolor{bordeaux}{when}}
+\newcommand{\onot}{\textcolor{\otherColor}{not}}
+\newcommand{\ty}{{\color{greenkey}type}}
+
+\def\Bl{\color{typeBlue}}
+
+\usepackage{minted}
+  \usemintedstyle{vs}
+	\renewcommand{\theFancyVerbLine}%
+	{\sffamily
+		\textcolor[rgb]{0.5,0.5,1.0}{\scriptsize
+			\oldstylenums{\arabic{FancyVerbLine}}}
+	}
+  
+\setminted{escapeinside=!!,firstnumber=last,baselinestretch=0.9}
+\newminted{TypeScript}{
+  frame=lines,
+  framesep=2mm,
+  baselinestretch=0.9,
+  fontsize=\footnotesize,
+  linenos,
+ % gobble=1,
+  numbersep=5pt,
+%  firstnumber=last,
+  breaklines
+} 
+
+	\setminted[elixir]{%
+%		frame=lines,
+%		bgcolor=snow,
+		fontsize=\small,
+		firstnumber=last,
+		baselinestretch=0.9,
+%		linenos=true,
+%		numbersep=.5em,%
+%		xleftmargin=0em,%
+		escapeinside=!!}
+%	\AtBeginEnvironment{minted}{\setlength{\parskip}{-3pt}}
+
+\newcommand{\js}[1]{\mintinline[escapeinside=!!,fontsize=\small,breaklines]{TypeScript}{#1}}
+
+
+\newcommand{\accept}[1]{\pmb{\lbag} #1 \pmb{\rbag}}
+\newcommand<>{\mypmb}[1]{\only#2{\pmb}{#1}}
+\newcommand{\myalert}[2]{{\only<#1>{\color{red}}{#2}}}
+\newcommand{\pb}[1]{\texttt{\color{typeBlue}#1}}          % \textt blue
+\newcommand{\syncap}{\operatornamewithlimits{\pmb{\bigwedge}}}
+\newcommand{\syncup}{\operatornamewithlimits{\pmb{\bigvee}}}
+\newcommand{\syntimes}{{\pmb{\times}}}
+
+\newenvironment {grammarfig} {\begin{equation*}\begin{array}{lrcll}}
+      {\end{array}\end{equation*}}
+
+\newcommand {\bnfeq} {\mathrel{{:}{:}{\raisebox{-.1ex}{$=$}}}}
+\newcommand {\bnfor} {\,\mathrel{\mid}\,}
+\newcommand {\fun}[2] {#1 \rightarrow #2}
+\newcommand {\gradual} {\mathrel{\typecolon\typecolon}}
+\newcommand {\none} {\mathtt{none()}}
+\newcommand {\intTop} {\mathtt{int}}
+\newcommand {\integer} {\intTop}
+\newcommand {\atomTop} {\mathtt{atom}}
+\newcommand {\atom} {\atomTop}
+\newcommand{\rarr}{\rightarrow}
+
+\newcommand {\tupleTop} {\topp_{\texttt{tup}}}
+\newcommand {\function} {\topp_{\texttt{fun}}}
+\newcommand {\dynamic} {\mathtt{dynamic}}
+\newcommand {\strongType}[1] {\p{#1}^{\star}}
+%\newcommand {\dyn} {\texttt{?}}
+\newcommand{\ov}[1]{\overline{#1}}
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% % Expression Constructors
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand {\lam}[2] {\lambda\,(\,#1.\,{#2})}
+\newcommand {\tlam}[3] {\lambda\,(#1:#2.\,{#3})}
+\newcommand {\app}[2] {#1\,(\,{#2}\,)}
+\newcommand {\elet}[3] {\mathtt{let}\,{#1}={#2}\,\,\mathtt{in}\,\,{#3}}
+\newcommand {\tlet}[4] {\mathtt{let}\,{#1}:{#2}={#3}\,\,\mathtt{in}\,\,{#4}}
+\newcommand {\tuple}[1] {\{#1\}}
+
+\newcommand {\caseExpr}[1][e]
+{\mathtt{case}\,\,{#1}\,\,\mathtt{do}\,\,\ov{\When{p}{g}\rarr e}}
+
+\newcommand {\caseExprIndex}[1][e]
+{\mathtt{case}\,{#1}\,\,\mathtt{do}\,\,\p{\When{p_i}{g_i}\rarr e_i}_{i<n}}
+
+\newcommand {\caseValue}
+{\mathtt{case}\,\,v\,\,\mathtt{do}\,\,\ov{\When{p}{g}\rarr e}}
+
+\newcommand {\caseExprNoG}
+{\mathtt{case}\,\,e\,\,\mathtt{do}\,\,\ov{p_i\rarr e_i}}
+
+\newcommand {\caseExprDots}[1][e]
+{\mathtt{case}\,\,{#1}\,\,\mathtt{do}\,\,\When{p_1}{g_1}\rarr e_1
+  \,\boldmath{;}\unboldmath\,\cdots\,\boldmath{;}\unboldmath\,\When{p_n}{g_n} \rarr e_n}
+
+\newcommand {\caseExprOv}[1][e]
+{\mathtt{case}\,\,{#1}\,\,\mathtt{do}\,\,\ov{\When{p}{g}\rarr e}^{\,i}}
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% % Guard Constructors
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand {\When}[2] {{#1}{#2}}
+\newcommand {\gnot}[1] {\mathtt{not}\,\,{#1}}
+\newcommand {\gand}[2] {#1\,\,\mathtt{and}\,\,{#2}}
+\newcommand {\gor}[2] {#1\,\,\mathtt{or}\,\,{#2}}
+\newcommand {\isInt}[1] {\mathtt{is\_integer}\,({#1})}
+\newcommand {\isAtom}[1] {\mathtt{is\_atom}\,({#1})}
+\newcommand {\isTuple}[1] {\mathtt{is\_tuple}\,({#1})}
+\newcommand {\isMapKey}[2] {\mathtt{is\_map\_key}\,({#1},{#2})}
+\newcommand {\isFunction}[2] {\mathtt{is\_function}\,({#1},{#2})}
+\newcommand {\elem}[2] {\mathtt{elem}\,({#1},{#2})}
+\newcommand {\tupleSize}[1] {\mathtt{tuple\_size}\,({#1})}
+\newcommand {\eqq}[2] {#1\,\,\texttt{===}\,\,{#2}}
+\newcommand {\neqq}[2] {#1\,\,\texttt{!==}\,\,{#2}}
+\newcommand {\ltt}[2] {#1\,\,\texttt{<}\,\,{#2}}
+\newcommand {\lteq}[2] {#1\,\,\texttt{<=}\,\,{#2}}
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% % Different Operators
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand {\Lgab} {\rotatebox[origin=c]{180}{$\Rbag$}}
+\newcommand {\Rgab} {\rotatebox[origin=c]{180}{$\Lbag$}}
+\newcommand {\acceptedType}[1] {{\Lbag}#1{\Rbag}}
+\newcommand {\pAccType}[1] {{\Lgab}#1{\Rgab}}
+\newcommand {\sAccType}[1] {{\Lbag}#1{\Rbag}}
+\newcommand {\sem}[1] {\llbracket#1\rrbracket}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Theorem and proof environments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% \newcounter {theorem}
+%%  \newtheorem {definition}  {Definition} [section]
+%%  \newtheorem {property}    [definition] {Property}
+%%  \newtheorem {theorem}     [definition] {Theorem}
+%%  \newtheorem {remark}     [definition] {Remark}
+%%  \newtheorem {proposition} [definition] {Proposition}
+%%  \newtheorem {lemma}       [definition] {Lemma}
+%%  \newtheorem {corollary}   [definition] {Corollary}
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% % Syntax
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand {\tttrue} {\mathtt{true}}
+\newcommand {\ttfalse} {\mathtt{false}}
+\newcommand {\ttnot} {\mathtt{not}}
+
+\newcommand {\GuardNot}[1] {\ttnot\, #1}
+\newcommand {\GuardAnd}[2] {#1\,\ttand\, #2}
+\newcommand {\GuardOr}[2] {#1\,\ttor\, #2}
+\newcommand {\GuardTrue} {\tttrue}
+\newcommand {\GuardFalse} {\ttfalse}
+\newcommand {\GuardIsOf}[2] {#1 \,\isof\, #2}
+\newcommand {\GuardEq}[2] {#1 = #2}
+\newcommand {\GuardEqq}[2] {#1 \,\texttt{==}\, #2}
+\newcommand {\GuardNeq}[2] {#1 \,\texttt{!=}\, #2}
+\newcommand {\GuardSize} {\mathtt{size}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Support macros
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\newcommand {\loneunb} {{\mbox{%
+  \raisebox{0.03em}{\rlap{$ \ulcorner $}}%
+  \raisebox{-0.18em}{$ \llcorner $}}\kern-0.1em}}
+
+\newcommand {\roneunb} {{\kern-0.1em\mbox{%
+  \raisebox{0.03em}{\rlap{$ \urcorner $}}%
+  \raisebox{-0.18em}{$ \lrcorner $}}}}
+
+\newcommand {\DeclareMyOperator}[2] {%
+  \expandafter\newcommand\csname#1\endcsname{\textsf{\textup{#2}}}}
+
+\DeclareMathAlphabet {\MyMathBb} {U} {bbold} {m} {n}
+
+
+\DeclarePairedDelimiterX\Hole[1]{[}{]}{
+   \ifblank{#1}{\,}{#1}
+}
+
+\DeclarePairedDelimiterX\HoleUnbound[1]{\loneunb}{\roneunb}{
+   \ifblank{#1}{\,}{#1}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Inference rules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def \TirNameStyle #1{\small #1}
+
+\newcommand {\Infer} [4] [] {
+  \inferrule*[%
+    left={\ifx\\#1\\#1\else\ifx\\#2\\[\textsc{#1}]\:\else[\textsc{#1}]\fi\fi},%
+    right={$ #4 $}%
+  ]%
+  {#2}{#3}}
+\newcommand{\linen}[1]{\makebox[4mm][l]{\color{red}\scriptsize #1}}
+\renewcommand {\setminus}{\smallsetminus}
+\newcommand {\Rule}[1] {[\textsc{#1}]}
+\newcommand {\Rulem}[1] {[\textsc{\ensuremath{#1}}]}
+\newcommand{\tcase}[4]{\ensuremath{\texttt{\textup{(}}#1{\in}#2\texttt{\textup{)}}\,\texttt{\textup{?}}\,#3\,\textbf{\textup{:}}\,#4}}
+\newcommand{\letexp}[3]{\ensuremath{\texttt{\textup{let}}\,#1\,\texttt{\textup{=}}\,#2\,\texttt{\textup{in}}\,#3\,}}
+\newcommand{\useexp}[3]{\ensuremath{\texttt{\textup{use}}\,#1\,\texttt{\textup{=}}\,#2\,\texttt{\textup{in}}\,#3\,}}
+\newcommand{\bindexp}[3]{\ensuremath{\texttt{\textup{bind}}\,#1\,\texttt{\textup{=}}\,#2\,\texttt{\textup{in}}\,#3\,}}
+\newcommand{\evalexp}[2]{\ensuremath{\texttt{\textup{let}}\,#1\,\texttt{\textup{in}}\,#2\,}}
+\newcommand{\morecompact}{\baselineskip=9.5pt}
+\newcommand{\ex}{\boldsymbol{e}}
+\newcommand{\eb}{\boldsymbol{e}}
+\newcommand{\ab}{\boldsymbol{a}}
+\newcommand{\kappab}{\boldsymbol{\kappa}}
+\newcommand{\varphib}{\boldsymbol{\varphi}}
+\newcommand{\MSCF}[1]{\mathsf{MSC}(#1)}
+
+\newcommand {\Pd} {\mathcal{P}}
+\newcommand {\Pf} {\mathcal{P}_{\!\textup{fin}}}
+\newcommand {\Pc} {\mathcal{P}_{\!\textup{cofin}}}
+\newcommand {\Domain} {\mathcal{D}}
+\newcommand {\Constants} {\mathcal{C}}
+\newcommand {\TypeInter}[1] {\llbracket #1 \rrbracket}
+\def\dbar{{\mkern3mu\mathchar'26\mkern-7mu\raisebox{-.7pt}{$\mathchar'26$}\mkern-11mu d}}
+\newcommand {\domega} {\dbar} %possibilities: \dbar \dh \dj \delta
+\newcommand {\dbot} {\partial}
+\newcommand {\Set}[1] {\{#1\}}
+\newcommand {\ConstantsInBasicType} {\mathbb{B}}
+
+\newcommand{\col}{\texttt{\,:\,}}
+\newcommand{\colopt}{\texttt{\,?:\,}}
+\newcommand{\Vee}{{\vee}}
+\newcommand{\Wedge}{{\wedge}}
+\newcommand{\To}{{\to}}
+\newcommand{\In}{{\in}}
+\newcommand{\Times}{{\times}}
+\newcommand{\Setminus}{\ensuremath{{\setminus}}}
+\newcommand {\Y} [1] {\textup{\textsf{Y}}^{#1}}
+\newcommand {\K} [1] {\texttt{#1}}
+\newcommand{\unit}{\texttt{()}}
+\newcommand {\nil}{\K{nil}}
+\newcommand {\Null}{\K{null}}
+\newcommand{\tauUp}{\tau^\Uparrow}
+\newcommand{\sigmaUp}{\sigma^\Uparrow}
+\newcommand{\types}{\textbf{\textup{Types}}}
+\newcommand{\occ}[2]{#1{\downarrow}#2}
+\newcommand{\basic}[1]{\text{\fontshape{\itdefault}\fontseries{\bfdefault}\selectfont b}_{#1}}
+\newcommand{\typ}[2]{\mathbb{t}(#1,#2)}
+\newcommand{\tyof}[2]{\textsf{\textup{typeof}}_{#2}(#1)}
+\newcommand{\typof}[1]{\textsf{\textup{typeof}}(#1)}
+\newcommand{\typep}[3]{\textsf{\textup{Constr}}^{#1}_{#3}(#2)}
+\newcommand{\Gp}[2]{\textsf{Env}^{#1}_{#2}}
+\newcommand{\ite}[4]{\ensuremath{\texttt{if}\;#1\in#2\;\texttt{then}\;#3\;\texttt{else}\;#4}}
+\newcommand{\Let}[3]{\ensuremath{\texttt{let}\;#1\;\texttt{=}\;#2\;\texttt{in}\;#3}}
+\newcommand{\anns}{\ensuremath{A}}
+\newcommand{\ann}[2]{#1{\triangleright}#2}
+%\renewcommand{\alt}{~|~}
+\newcommand {\doublecoloneq} {::=}
+\newcommand{\arrow}[2]{#1\to #2}
+\newcommand{\pair}[2]{#1\times #2}
+\newcommand{\patpair}[2]{\ensuremath(#1,#2)}
+\newcommand{\is}{\mathrel{=\!\!\!\!=}}
+\newcommand{\opt}{\mathrel{\Rightarrow}}
+\newcommand{\concat}{\ensuremath{\mathrel{\quas}}}
+\newcommand{\orecord}[1]{\pmb{\texttt{\{}}#1\ {\textbf{..}}\pmb{\texttt{\}}}}
+\newcommand{\crecord}[1]{\pmb{\texttt{\{}}#1\pmb{\texttt{\}}}}
+\newcommand{\orec}[1]{\mathopen{\pmb{\texttt{\{}}}#1\mathclose{\pmb{\texttt{\}}}}}
+\newcommand{\crec}[1]{\mathopen{\pmb{\texttt{\{\!|}}}#1\mathclose{\pmb{\texttt{|\!\}}}}}
+\newcommand{\mrec}[2]{\mathopen{\pmb{\texttt{\{}}}#1\,,\,\wild\opt#2\mathclose{\pmb{\texttt{\}}}}}
+\newcommand{\erecord}[1]{\texttt{\{}#1\texttt{\}}}
+\newcommand{\record}[2]{\{#1 ,\ \_ = #2\}}
+\newcommand{\extrecord}[3]{\ensuremath{\texttt{\{}#1\;\texttt{with}\;#2\;\texttt{=}\;#3\texttt{\}}}}
+\newcommand{\precord}[2]{\pmb{\texttt{\{}}#1\pmb{\texttt{|}}#2\pmb{\texttt{\}}}}
+\newcommand {\matchbar} {\texttt{\textbf{\raisebox{-0.2ex}{\scalebox{1.1}{|}}}}}
+\newcommand {\matches} {/}
+\newcommand{\matchto}{\mbox{\boldmath$\,\to\,$}}
+\newcommand{\match}[2]{\texttt{match}\,#1\,\texttt{with}\,#2}
+\newcommand{\matchone}[3]{\texttt{match}\,#1\,\texttt{with}\,#2 \matchto #3}
+\newcommand{\matchtwo}[5]{\texttt{match}\,#1\,%
+               \texttt{with}\,#2 \matchto #3\,\matchbar\,%
+                #4 \matchto #5}
+\newcommand {\matchfail} {\textsf{fail}}
+\newcommand {\valsubst} {\sigma}
+\newcommand {\update}[3] {#1\raisebox{.7pt}{$\scriptstyle\leftarrow$}\langle[#2]{=}#3\rangle} 
+
+\newcommand{\el}[2]{\ell^{#2}_{#1}}
+\DeclareFontFamily{U}{mathb}{}
+\DeclareFontShape{U}{mathb}{m}{n}{
+  <-5.5> mathb5
+  <5.5-6.5> mathb6
+  <6.5-7.5> mathb7
+  <7.5-8.5> mathb8
+  <8.5-9.5> mathb9
+  <9.5-11.5> mathb10
+  <11.5-> mathb12
+}{}
+\DeclareSymbolFont{mathb}{U}{mathb}{m}{n}
+\DeclareMathSymbol{\sqdot}{\mathbin}{mathb}{"0D}% name to be checked
+\newcommand{\Cx}{\mathcal{C}}
+\newcommand{\worra}[2]{#1\mathop{\,\sqdot\,} #2}
+\newcommand{\apply}[2]{#1\circ#2}
+\newcommand{\applyopt}[2]{#1\circ_\Any#2}
+\newcommand {\Empty} {\ensuremath{\MyMathBb{0}}}
+\newcommand {\Any} {\ensuremath{\MyMathBb{1}}}
+\newcommand {\dom}[1]{\textup{\textsf{dom}}(#1)}
+\newcommand {\Keyw} [1] {\textup{\textsf{#1}}}
+\newcommand {\False} {\Keyw{False}}
+\newcommand {\True} {\Keyw{True}}
+\newcommand {\Int} {\Keyw{Int}}
+\newcommand {\Bool} {\Keyw{Bool}}
+\newcommand {\Char} {\Keyw{Char}}
+\newcommand {\Real} {\Keyw{Real}}
+\newcommand {\Complex} {\Keyw{Complex}}
+\newcommand {\String} {\Keyw{String}}
+\newcommand {\Atom} {\Keyw{Atom}}
+\newcommand{\Labels}{\Keyw{Labels}}
+\newcommand{\Ell}{\ensuremath{\mathcal{L}}}
+\newcommand{\Exp}{\ensuremath{\mathcal{E}}}
+\newcommand{\Val}{\ensuremath{\mathcal{V}}}
+\newcommand{\qcto}{\ensuremath{\rightarrowtriangle}}
+\newcommand{\qsto}{\ensuremath{\stackrel{\raisebox{-3pt}{$\scriptscriptstyle\Ktypes$}}{\rightarrowtriangle}}}
+\newcommand{\ktype}{k}%\text{\it keytype}}
+\newcommand{\Ktypes}{\mathbb{K}}%\text{\it keytype}}
+\newcommand{\wild}{\rule[-1pt]{6pt}{.7pt}}
+\newcommand{\prodc}[1]{\hspace*{3pt}{\scriptsize\triangleright}\hspace*{-9pt}\prod_{#1}}
+\newcommand{\prods}[1]{\hspace*{3pt}{\scriptscriptstyle\Ktypes}\hspace*{-8.4pt}\prod_{#1}}
+\newcommand{\Prodc}[1]{\displaystyle\prod_{#1}\hspace*{-10.7pt}{\scriptsize\triangleright}\hspace*{7pt}}
+\newcommand{\Undef}{\ensuremath{\bot}}
+\newcommand{\undefcst}{\texttt{undef}}
+\newcommand {\Cast}[2]{\tt #2\(\langle\)#1\(\rangle\)}
+\newcommand {\MCast}[2]{#2\langle #1\rangle}
+\newcommand
+    {\ifty}[4]{\ensuremath{\texttt{(}#1\in#2\texttt{)?}#3\texttt{:}#4}}
+
+\newcommand {\unfold}{\ensuremath{\mathsf{unfold}}}    
+\newcommand {\term}{\ensuremath{\mathsf{term}}}
+\newcommand {\ucanon}[1]{\llbracket  #1\rrbracket}    
+\newcommand {\canon}[2]{\llbracket  #1\rrbracket_{#2}}
+\newcommand {\tcanon}[3]{\llbracket  #1\rrbracket_{#2}^{#3}}    
+\newcommand {\Compile}[1]{\llbracket  #1\rrbracket}    
+\newcommand {\code}[1]{\texttt{\color{darkblue}#1}}
+\newcommand {\p}[1]{\texttt{#1}}
+\newcommand {\Iff}{\Leftrightarrow}
+\newcommand {\iffdef}  {\hbox{\;\;$\iff$\hspace*{-5.94mm}\raise5pt\hbox{\rm\scriptsize def}\hspace*{4mm}}}
+\newcommand {\Iffdef}  {\hbox{\;\;$\Iff$\hspace*{-3.34mm}\raise5pt\hbox{\rm\scriptsize def}\hspace*{1.4mm}}}
+\newcommand {\eqdef}  {\hbox{\;\;$=$\hspace*{-2.94mm}\raise5pt\hbox{\rm\scriptsize def}\hspace*{1mm}}}
+%\newcommand {\eqdnf}  {\hbox{\;\;$=\joinrel=$\hspace*{-3.8mm}\raise5pt\hbox{\sc\scriptsize dnf}\hspace*{1.86mm}}}
+\newcommand {\eqdnf}  {\hbox{\;\;$\simeq$\hspace*{-2.94mm}\raise5pt\hbox{\sc\scriptsize dnf}\hspace*{1mm}}}
+\newcommand {\eqdeftiny}  {\hbox{\;\;$=$\hspace*{-2.55mm}\raise5pt\hbox{\rm\tiny def}\hspace*{1.5mm}}}
+\newcommand {\eqcan}{\equiv_\kappa}
+\newcommand {\bpi} {\boldsymbol{\pi}}
+\newcommand {\bpl}[1] {\boldsymbol{\pi}_{\boldsymbol 1}(#1)}
+\newcommand {\bpr}[1] {\boldsymbol{\pi}_{\boldsymbol 2}(#1)}
+\newcommand {\proj}[2] {#2.#1}
+\newcommand {\recupd}[3] {\texttt{\{} #1 \texttt{ with } #2 = #3 \texttt{\}}}
+\newcommand {\recdel}[2] {#1 \mathtt{ \setminus } #2}
+%\DeclareMathOperator{\eqq}{\texttt{=?}}
+
+% ---------------------------------------------------------------------------------
+
+% New packages
+\usepackage{bbm}
+\usepackage{mathbbol}
+%
+% Records
+%
+
+% define semantic curly braces \lBrace \rBrace
+\newcommand{\lBrace}{\mathopen{\{\hspace*{-2.5pt}\raisebox{.15pt}{$[$}}}
+\newcommand{\rBrace}{\mathclose{\raisebox{.15pt}{$]$}\hspace*{-3.5pt}\}}}
+% quasi-constant function
+\newcommand{\qcf}[1]{\lBrace #1 \rBrace}
+\newcommand{\T}{t}
+\newcommand{\R}{{\texttt{R}}}
+\newcommand{\RR}{{\mathscr{R}}}
+\newcommand {\patas} [2] {#1 \mathrel{\mathsf{as}} #2}
+\newcommand{\pator}[2]{#1 \matchbar #2} % chktex 1
+\newcommand{\patand}[2]{#1 {\And} #2} % chktex 1
+\newcommand{\patconst}[2]{(#1 \texttt{:=} #2)} % chktex 1
+\newcommand{\patrec}[1]{\texttt{\{}#1\texttt{\}}}
+\newcommand{\patrecord}[1]{\texttt{\{}#1\,\textbf{..}\texttt{\}}}
+\newcommand{\patorec}[1]{\patrec{#1 \,\texttt{,}\,\textbf{..}}}
+\newcommand {\patacc} [1] {\lbag #1 \rbag}
+\newcommand{\toprec}{\patrec{\textbf{..}}}
+\newcommand{\minus}{\texttt{\symbol{92}}}
+\newcommand{\Or}{\ensuremath{\vee}}
+\renewcommand{\And}{\ensuremath{\wedge}}
+\newcommand{\enquote}[1]{``#1''}
+
+
+
+% New commands
+\DeclareMathSymbol{\bbsemicolon}{\mathpunct}{bbold}{"3B}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\newcommand{\true} {\textsf{true}}
+\newcommand{\false} {\textsf{false}}
+\newcommand{\Even} {\textsf{Even}}
+\newcommand{\Odd} {\textsf{Odd}}
+%\newcommand{\subs}[2]{\{#1 \mapsto #2\}}
+\newcommand{\subs}[2]{\{#2/#1\}}
+\newcommand{\esubs}[2]{\{#2/#1\}}
+\newcommand{\envsubs}[2]{\{#1 \mapsto #2\}}
+\newcommand{\envup}[2]{[#1 := #2]}
+\renewcommand{\envup}[2]{[#1\hbox{\;$:=$\hspace*{-1.85mm}\raise5pt\hbox{\rm\tiny$\wedge$}\hspace*{1.6mm}}#2]}
+\newcommand{\fv}{\textsf{fv}}
+\newcommand{\bv}{\textsf{bv}}
+\newcommand{\var}{\textsf{var}}
+\newcommand{\eref}[2]{\ensuremath{\texttt{cell}_{#1,#2}}}
+\newcommand{\loc}[2]{\ensuremath{\textbf{\textup{loc}}(#1,#2)}}
+\newcommand{\tref}[1]{\ensuremath{\textbf{\textup{ref}}(#1)}}
+\newcommand{\bigland}{\bigwedge}
+\newcommand{\biglor}{\bigvee}
+\newcommand {\topp} {\mathbb{1}}
+\newcommand {\bott} {\mathbb{O}}
+
+\newcommand {\TypeEnv}[2]
+{\raisebox{0.2ex}{\small$#1$}/\raisebox{-0.5ex}{\small$#2$}}
+
+\newcommand {\typEnv}[2]
+{\left(\TypeEnv{#1}{#2}\right)}
+
+
+\newcommand {\typingruleExtra}[4]
+{\ensuremath{#1\,\,\displaystyle\frac{\begin{array}{l}#2\end{array}}{#3}\,#4}}
+
+\newcommand{\acc}[2]{\acceptedType{#1}_{#2}}
+\newcommand{\caseExprI}{\ensuremath{\texttt{case}\,\, e \,\, \texttt{do} \,\,
+  \ov{p_i g_i \rightarrow e_i}_{i<n}}}
+
+\newcommand {\case}[3] {\texttt{case}\,\, #1 \,\, \texttt{do} \,\,
+  #2 \,\, ; \,\, #3}
+\newcommand{\vd}{\vdash}
+
+
+
+\newcommand{\Refinef}{\textsf{\textup{Refine}}}
+\newcommand{\Refine}[2]{\ensuremath{\Refinef_{#1}(#2)}}
+\newcommand{\RefineStep}[1]{\textsf{\textup{RefineStep}}_{#1}}
+
+\newcommand{\tbwedge}[0]{\textstyle\bigwedge}
+\newcommand{\tbvee}[0]{\textstyle\bigvee}
+\newcommand{\tbcup}[0]{\textstyle\bigcup}
+\newcommand{\tbcap}[0]{\textstyle\bigcap}
+
+\newcommand{\constrf}{\textsf{\textup{Constr}}}
+\newcommand{\constr}[2]{\constrf_{#2}(#1)}
+%\newcommand{\env}[1]{\textsf{Env}_{#1}}
+\newcommand{\env}[1]{\textsf{\textup{Intertype}}_{#1}}
+
+\newcommand{\cons}[2]{{#1}\textsf{::}{#2}}
+\newcommand{\gfp}[1]{\textsf{gfp}_{#1}}
+\newcommand{\reduces}{\leadsto}
+\newcommand{\xleadsto}[1]{\overset{#1}{\leadsto}}
+\newcommand{\idleadsto}[0]{\xleadsto{\textit{Id}}}
+\newcommand{\uleadsto}[0]{\xleadsto{\large{\textbf{\_}}}}
+\newcommand{\exreduces}{\leadsto_{\texttt{Ex}}}
+\newcommand{\tlreduces}{\leadsto_{\texttt{Top}}}
+\newcommand{\ev}[0]{\bar v}
+\newcommand{\Values}{\mathcal{V}}
+\newcommand {\BasicTypes} {\mathcal{B}}
+\newcommand {\Types} {\mathcal{T}}
+\newcommand {\BasicTypeOfConstant} [1] {b_{#1}}
+\newcommand{\valsemantic}[1]{{\llbracket #1 \rrbracket}_{\values}}
+\newcommand{\vvdash}[0]{\vdash_\values}
+\newcommand{\AR}{-Alg}%\ensuremath{_\mathcal{A}}}
+\newcommand{\IR}{-Int}%\ensuremath{_\mathcal{A}}}
+\newcommand{\eras}[1]{\lceil#1\rceil}
+\newcommand{\aeras}[1]{\langle#1\rangle}
+\newcommand{\norm}[1]{\textsf{N}(#1)}
+%\newcommand{\norm}[1]{\textsf{Norm}(#1)}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\extint}[1]{\E(#1)}
+\newcommand{\tenv}[0]{\vec \alpha}
+%%% More flexible overline
+\newcommand*\oline[1]{%
+   \vbox{%
+     \hrule height 0.6pt%                  % Line above with certain width
+     \kern0.25ex%                          % Distance between line and content
+     \hbox{%
+       \kern-0em%                        % Distance between content and left side of box, negative values for lines shorter than content
+       \ifmmode#1\else\ensuremath{#1}\fi%  % The content, typeset in dependence of mode
+       \kern-0em%                        % Distance between content and left side of box, negative values for lines shorter than content
+     }% end of hbox
+   }% end of vbox
+}
+
+\newcommand{\make@circled}[2]{%
+  \ooalign{$\m@th#1\smallbigcirc{#1}$\cr\hidewidth$\m@th#1#2$\hidewidth\cr}%
+}
+\newcommand{\smallbigcirc}[1]{%
+  \vcenter{\hbox{\scalebox{0.77778}{$\m@th#1\bigcirc$}}}%
+}
+
+\newcommand{\isep}{\mathrel{{.}\,{.}}\nobreak}
+
+\newcommand{\tsand}{\mathbin{\mathpalette\make@circled\wedge}}
+\newcommand{\tsor}{\mathbin{\mathpalette\make@circled\vee}}
+%\newcommand{\tstimes}{\otimes}
+\newcommand{\tstimes}{\mathbin{\mathpalette\make@circled\times}}
+\newcommand{\tsempty}{\Omega}
+\newcommand{\tsfun}[1]{{[}#1]}
+\newcommand{\tsfunone}[2]{{[}\arrow {#1} {#2}]}
+\newcommand{\ts}{\mathbbm{t}}
+\newcommand{\tsint}[1]{\textbf{\textup{\{}}#1\textbf{\textup{\}}}}
+\newcommand{\tsrep}[1]{\textsf{\textup{Repr}}(#1)}
+
+\newcommand{\vdashA}{\vdash_{\!\scriptscriptstyle\mathcal{A}}}
+\newcommand{\vdashI}{\vdash_{\!\scriptscriptstyle\mathcal{I}}}
+\newcommand{\vdashC}{\vdash_{\!\scriptscriptstyle\mathcal{C}}}
+\newcommand{\vdashAts}{\vdash_{\!\scriptscriptstyle\mathcal{A}_\text{ts}}}
+\newcommand{\vdashp}{\vdash^{\texttt{Path}}}
+\newcommand{\pvdash}[3]{\vdashp_{#1,#2,#3}}%\mathcal{P}
+\newcommand{\evdash}[2]{\vdash^{\texttt{Env}}_{#1,#2}}
+
+\DeclareMathSymbol{\qm}{\mathalpha}{operators}{"3F}
+\DeclareMathAlphabet{\mathbbm}{U}{bbold}{m}{n}
+\newcommand{\dyn}{\ensuremath{\mathbbm{\qm}}}
+\newcommand{\Aa}{\ensuremath{_{\scriptscriptstyle\mathcal{A}}}}
+\newcommand{\Aats}{\ensuremath{_{\scriptscriptstyle\mathcal{A}_\text{ts}}}}
+
+\newcommand{\triple}[3]{\texttt{(}#1\,\texttt{,}\,#2\texttt{,}\,#3\texttt{)}} % chktex 9
+\newcommand{\striple}[1]{\texttt{\scriptsize(}\texttt{#1}_1\texttt{\scriptsize,}\,\texttt{#1}_2\texttt{\scriptsize,}\,\texttt{#1}_3\texttt{\scriptsize)}}
+\newcommand{\stuple}[1]{\texttt{\scriptsize(}\texttt{#1}_1\texttt{\scriptsize,}\,...\texttt{\scriptsize,}\,\texttt{#1}_n\texttt{\scriptsize)}}
+\newcommand{\Sub}{\leq}%{\texttt{\raisebox{-.5pt}{<}\hspace*{-1.5pt}\raisebox{.4pt}{:}}}
+\newcommand{\Not}[1]{\texttt{not(}#1\texttt{)}} % chktex 9
+\renewcommand{\T}{\texttt{T}}
+\newcommand{\Ss}{\texttt{S}}
+\newcommand{\Def}[1]{\textup{\textsf{deflt}}(#1)}
+\newcommand{\quas}{\pmb{\texttt{+}}}
+\newcommand{\quasiL}[1]{\textsf{quasi}_L(#1)}
+\newcommand{\others}[1]{\textsf{others}(#1)}
+\makeatletter
+\DeclareFontFamily{OMX}{MnSymbolE}{}
+\DeclareSymbolFont{MnLargeSymbols}{OMX}{MnSymbolE}{m}{n}
+\SetSymbolFont{MnLargeSymbols}{bold}{OMX}{MnSymbolE}{b}{n}
+\DeclareFontShape{OMX}{MnSymbolE}{m}{n}{
+    <-6>  MnSymbolE5
+   <6-7>  MnSymbolE6
+   <7-8>  MnSymbolE7
+   <8-9>  MnSymbolE8
+   <9-10> MnSymbolE9
+  <10-12> MnSymbolE10
+  <12->   MnSymbolE12
+}{}
+\DeclareFontShape{OMX}{MnSymbolE}{b}{n}{
+    <-6>  MnSymbolE-Bold5
+   <6-7>  MnSymbolE-Bold6
+   <7-8>  MnSymbolE-Bold7
+   <8-9>  MnSymbolE-Bold8
+   <9-10> MnSymbolE-Bold9
+  <10-12> MnSymbolE-Bold10
+  <12->   MnSymbolE-Bold12
+}{}
+
+\let\llangle\@undefined
+\let\rrangle\@undefined
+\DeclareMathDelimiter{\llangle}{\mathopen}%
+                     {MnLargeSymbols}{'164}{MnLargeSymbols}{'164}
+\DeclareMathDelimiter{\rrangle}{\mathclose}%
+                     {MnLargeSymbols}{'171}{MnLargeSymbols}{'171}
+
+
+\makeatother
+
+\DeclareUnicodeCharacter{02983}{\lBrace}
+
+\newcommand{\rec}[3]{\ensuremath{\llangle #1 \;\textbf{\textup ;}\; #2
+    \;\textbf{\textup ;}\; #3 \,\rrangle}}
+
+\newcommand{\leqA}{\leq_{\!\scriptscriptstyle\mathcal{A}}}
+
+\newcommand{\normalize}[0]{\texttt{NF}}
+\newcommand{\factorize}[0]{\texttt{factorize}}
+
+\newcommand{\leqdep}{\leq_{\text{dep}}}
+\newcommand{\ltdep}{<_{\text{dep}}}
+
+
+
+
+\newcommand {\BoolB} {\mathfrak{b}}
+
+\newcommand{\bbGamma}{{\mathpalette\makebbGamma\relax}}
+\newcommand{\makebbGamma}[2]{%
+  \raisebox{\depth}{\scalebox{1}[-1]{$\mathsurround=0pt#1\mathbb{L}$}}%
+}
+
+\newcommand{\Raux}[1]{\textsf{Aux}_{#1}}
+\newcommand{\RRefine}[1]{\textsf{Refine}_{#1}}
+\newcommand{\lfp}[1]{\textsf{lfp}_{#1}}
+\newcommand{\RRefineStep}[1]{\textsf{RefineStep}_{#1}}
+\newcommand{\dt}[0]{\mathbb{T}}
+\newcommand{\fvdash}[2]{\vdash^{\texttt{Env}\rightarrow}_{#1,#2}}
+\newcommand{\bvdash}[2]{\vdash^{\texttt{Env}\leftarrow}_{#1,#2}}
+\newcommand{\bjudg}[4]{[#1\vdash \Box(#2{\reduces}#3)]\;\supset\;#4}
+\newcommand{\bfjudg}[4]{[#1\vdash \Box(#2\reduces#3)]\;{\subset}{\supset}\;#4}
+\newcommand{\fjudg}[4]{[#1\vdash \Box(#2{\reduces}#3)]\;\subset\;#4}
+% \newcommand{\ufvdash}[3]{{\underset{#1}\vdash}^{\texttt{Env}\rightarrow}_{#2,#3}}
+% \newcommand{\ubvdash}[3]{{\underset{#1}\vdash}^{\texttt{Env}\leftarrow}_{#2,#3}}
+\newcommand {\refine}[2]{{#1}{\raisebox{-2px}{\big|}}_{#2}}
+\newcommand{\ufvdash}[3]{\vdash^{{#1},\texttt{ Env}\rightarrow}_{#2,#3}}
+\newcommand{\ubvdash}[3]{\vdash^{{#1},\texttt{ Env}\leftarrow}_{#2,#3}}
+\newcommand{\cvdash}[0]{\vdash^{\texttt{Choices}}}
+
+\newcommand{\msred}{\dashrightarrow}
+\newcommand{\tmsred}{\msred_{\top}}
+\newcommand{\ct}[0]{\mathcal{C}}
+\newcommand{\Gammap}[0]{{\Gamma'}}
+\newcommand{\avdash}[2]{\vdash_{#1,\ #2}}
+\newcommand{\bt}[0]{\texttt{Backtrack}}
+\newcommand{\Gammas}[0]{\bbGamma}
+\newcommand{\Tree}[0]{\texttt{T}}
+\newcommand{\Node}[0]{\texttt{N}}
+\newcommand{\Leaf}[0]{\texttt{L}}
+\newcommand{\tree}[0]{\mathcal{T}}
+\newcommand{\ttype}[0]{\texttt{type}}
+\newcommand{\tleaves}[0]{\texttt{leaves}}
+\newcommand{\tnodes}[0]{\texttt{nodes}}
+\newcommand{\tlabels}[0]{\texttt{labels}}
+\newcommand{\tflatten}[0]{\texttt{flatten}}
+\newcommand{\btr}[0]{\mathrel{\scalebox{.75}{\ensuremath{\blacktriangleright}}}}
+\newcommand{\tsplits}[0]{\texttt{interesting\_splits}}
+\newcommand{\tabstract}[0]{\texttt{abstract}}
+\newcommand{\taabstract}[0]{\texttt{abstract-arrow}}
+\newcommand{\taaabstract}[0]{\texttt{abstract-def}}
+
+\newcommand{\needsplit}[0]{\texttt{Need-split }}
+\newcommand{\type}[0]{\texttt{Type }}
+\newcommand{\aavdash}[0]{\vdash_{\mathcal{R}}}
+\newcommand{\aafun}[0]{\mathcal{R}}
+\newcommand{\alvdash}[0]{\vdash^{\texttt{Bind}}_{\mathcal{I}}}
+\newcommand{\absvdash}[0]{\vdash^{\texttt{Abs}}_{\mathcal{I}}}
+\newcommand{\result}[0]{\mathcal{R}}
+\newcommand{\forward}[0]{\texttt{sufficient}}
+\newcommand{\backward}[0]{\texttt{propagate}}
+\newcommand{\forwardaux}[0]{\texttt{sufficient'}}
+\newcommand{\backwardaux}[0]{\texttt{necessary'}}
+\newcommand{\complete}[0]{\texttt{complete}}
+\newcommand{\annots}[0]{\Delta}
+\newcommand{\annotsof}[0]{\texttt{annotations}}
+\renewcommand{\merge}[3]{#2\oplus_{#1}#3}
+\newcommand{\merging}[2]{#1{\owedge}#2}
+\newcommand{\Extend}[2]{#1\,\bbsemicolon\,#2}
+\newcommand{\Ann}[2]{#1{\blacktriangleright}#2}
+\newcommand{\splits}[0]{\texttt{splits}}
+\newcommand{\annotate}[2]{\lfloor#1\rfloor_{#2}}
+\newcommand{\Needsplit}[0]{\texttt{Need-split }}
+\newcommand{\Result}[0]{\texttt{Result }}
+\newcommand{\partition}[0]{\texttt{partition}}
+\newcommand{\emptyannots}[0]{\texttt{empty}}
+\newcommand{\restrictannots}[0]{\texttt{restrict}}
+\newcommand{\filterannots}[0]{\texttt{filter}}
+\newcommand{\extract}[0]{\texttt{extract}}
+\newcommand{\refines}[0]{\Rightarrow}
+\newcommand{\Res}[1]{(#1,\{\},\{\})}
+\newcommand{\NS}[3]{(#1,#2,#3)}
+\newcommand{\res}[1]{(#1,\{\})}
+\newcommand{\ns}[2]{(#1,#2)}
+\newcommand{\nos}[1]{(#1,\{\Gamma\})}
+\newcommand{\resnr}[0]{\texttt{Need-refinement }}
+\newcommand{\resno}[0]{\texttt{Untypeable }}
+\newcommand{\resok}[0]{\texttt{Ok }}
+
+\newcommand\restr[2]{{% we make the whole thing an ordinary symbol
+  \left.\kern-\nulldelimiterspace % automatically resize the bar with \right
+  #1 % the function
+  \vphantom{\big|} % pretend it's a little taller at normal size
+  \right|_{#2} % this is the delimiter
+  }}
+
+\makeatletter % allow us to mention @-commands
+
+
+\def\arcr{\@arraycr}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Custom Beamer Block Styling
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Customize exampleblock colors and fonts
+\setbeamercolor{block title example}{fg=white,bg=cadmiumgreen}
+\setbeamercolor{block body example}{fg=black,bg=cadmiumgreen!10}
+\setbeamerfont{block title example}{size=\large,shape=\bf}
+
+% Alternative exampleblock with different colors
+\newenvironment<>{customexample}[1]{%
+  \setbeamercolor{block title example}{fg=white,bg=darkgreen}%
+  \setbeamercolor{block body example}{fg=black,bg=darkgreen!5}%
+  \setbeamerfont{block title example}{size=\large,shape=\bf}%
+  \begin{exampleblock}#2{#1}%
+}{\end{exampleblock}}
+
+% Code example block with special styling
+\newenvironment<>{codeexample}[1]{%
+  \setbeamercolor{block title example}{fg=white,bg=darkblue}%
+  \setbeamercolor{block body example}{fg=black,bg=gray!5}%
+  \setbeamerfont{block title example}{size=\large,shape=\bf}%
+  \begin{exampleblock}#2{#1}%
+}{\end{exampleblock}}
+
+% Theorem-style example block
+\newenvironment<>{theoremexample}[1]{%
+  \setbeamercolor{block title example}{fg=white,bg=typePurple}%
+  \setbeamercolor{block body example}{fg=black,bg=typePurple!8}%
+  \setbeamerfont{block title example}{size=\large,shape=\bf}%
+  \begin{exampleblock}#2{#1}%
+}{\end{exampleblock}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Table of contents formatting
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Make table of contents bold
+\setbeamerfont{section in toc}{series=\bfseries}
+%\setbeamerfont{subsection in toc}{series=\bfseries}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

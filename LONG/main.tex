@@ -1,0 +1,82 @@
+\documentclass[aspectratio=169,compress]{beamer}
+\usetheme[university=bs,faculty=standard]{fibeamer}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=english
+]{babel}        %% typeset as follows:
+%%
+%%   \begin{otherlanguage}{italian}   ... \end{otherlanguage}
+%%
+%% These macros specify information about the presentation
+\title{Typing Dynamic Languages with Set-Theoretic Types:\\
+  The Case of Elixir}
+\subtitle{\mbox{ }\vspace{6mm}
+} %% title page.
+\author{Giuseppe CASTAGNA
+\hfill\parbox[t]{.2\textwidth}{
+\footnotesize\it
+Elisir di sì perfetta,\\[-1.5mm]
+di sì rara qualità,\\[-1.5mm]
+ne sapessi la ricetta,\\[-1.5mm]
+conoscessi chi ti fa!
+}\\\small
+(joint work with Guillaume Duboc and José Valim)}
+%% These additional packages are used within the document:
+\usepackage[overlay,absolute,
+%showboxes
+]{textpos}
+\usepackage{ragged2e}  % `\justifying` text
+\usepackage{booktabs}  % Tables
+\usepackage{tabularx}
+\usepackage{tikz}      % Diagrams
+\usetikzlibrary{calc, shapes, backgrounds}
+\usepackage{amsmath, amssymb}
+\usepackage{url}       % `\url`s
+\usepackage{listings}  % Code listings
+\usepackage{setup}
+\usepackage{ulem}
+\usepackage[cal=boondox,  % heavily sloped
+            scr=esstix]   % slightly sloped
+           {mathalpha}
+\newtagform{purple}{\color{purple}(}{)}
+%\frenchspacing
+
+\newcommand{\struct}[1]{\textcolor{lightblue}{#1}}
+% Beamer customization%%
+\setbeamerfont{frametitle}{shape=\bf,size=\LARGE}
+\addtobeamertemplate{frametitle}{\vspace*{-.4cm}}{\vspace*{0.2cm}}
+
+\newenvironment<>{myblock}[1]{%
+  \setbeamercolor{block title}{fg=cadmiumgreen,bg=white}%
+  \setbeamercolor{block body}{fg=black,bg=white}%
+  \setbeamerfont{block title}{size=\large,shape=\bf}
+  \begin{block}#2{{#1}\vspace{-1.5mm}}}{\end{block}}
+
+%%%% UNCOMMENT THE FOLLOWING LINE TO REMOVE SLIDE NUMBERS
+%\setbeamertemplate{footline}{}
+
+\begin{document}
+  \frame[c]{\maketitle}
+
+  %% \AtBeginSection[]{% Print an outline at the beginning of sections
+  %%   \begin{frame}<beamer>
+  %%     \frametitle{Outline for Section \thesection}
+  %%     \tableofcontents[currentsection]
+  %%   \end{frame}}
+
+\section{Set-Theoretic Types and Dynamic Languages}
+\input{set-theoretic}
+
+
+\input{core}
+
+\input{formalization}
+
+\section{Gradual Typing}
+\input{gradual}
+
+
+\section{Integration in Elixir}
+\input{implementation}
+
+\end{document}
