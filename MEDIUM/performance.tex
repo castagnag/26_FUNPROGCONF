@@ -1,0 +1,207 @@
+% Guillaume's empirical-evaluation segment (about 5--6 minutes).
+% Source: core-elixir/core-elixir-paper, revision 44493a5, inspected 2026-10-05.
+% Keep the corpus experiments separate from the Elixir v1.19 timing snapshot.
+% All charts are native TikZ objects; the measurements remain editable here.
+\newcommand{\perfsource}[1]{%
+  \vfill
+  {\scriptsize\color{gray}Source: Castagna \& Duboc, Core Elixir paper. #1\par}}
+
+\begin{frame}[t,label=perf-corpus]
+\frametitle{Precision on real Elixir code}
+\textbf{17 open-source projects, without user type annotations}
+
+\bigskip
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.47\textwidth}
+    {\fontsize{34}{38}\selectfont\bfseries\color{darkslateblue}86.1\%\par}
+    \smallskip
+    \textbf{Exact pattern/guard pairs}\par
+    \smallskip
+    {\small 141,755 of 164,701 analyzed pairs\par}
+    \medskip
+    The analysis identifies exactly which inputs match.
+  \end{column}
+  \begin{column}{0.47\textwidth}
+    {\fontsize{34}{38}\selectfont\bfseries\color{darkslateblue}61.7\%\par}
+    \smallskip
+    \textbf{Informative inferred returns}\par
+    \smallskip
+    {\small 43,158 of 69,976 inferred arrows\par}
+    \medskip
+    The return type differs from\par
+    \code{dynamic()}. For example,\par
+    \code{dynamic(integer())}.
+  \end{column}
+\end{columns}
+
+\perfsource{Empirical evaluation and compilation measurements.}
+\note{Source: evaluation.tex, lines 85--114 and 182--257; main.tex,
+  appendix Guard Exactness Corpus, lines 4760--4799. Both displayed ratios
+  are weighted counts over the selected 17-project corpus. Do not confuse
+  the 86.07 percent aggregate with the separate six-codebase measurement
+  of 64.44 percent. Exactness counts analyzed pattern/guard pairs, not
+  functions or bugs. Postgrex is an outlier at 34.83 percent, largely because
+  generated list-head dispatch patterns are conservatively treated as inexact.
+  Return informativeness counts arrows, not functions. The return experiment
+  covers 517,999 lines of code. A return gets score 1 whenever it is not
+  exactly dynamic(); this is a coarse binary measure, not a percentage of
+  fully statically typed code. Inference does not use inferred function types
+  across module boundaries in this experiment, which limits return information.
+  Reproduction artifacts: https://github.com/gldubc/core-elixir-experiments.}
+\end{frame}
+
+\begin{frame}[fragile,t,label=perf-narrowing]
+\frametitle{Narrowing through a nested condition}
+\textbf{Elixir adaptation of \textit{If-T}: 12/13 core items pass}
+\hfill{\small Research compiler}
+
+\bigskip
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.61\textwidth}
+\begin{minted}[fontsize=\small]{elixir}
+# x, y : term()
+if if(is_integer(x),
+      do: is_binary(y),
+      else: false) do
+  x + byte_size(y)
+else
+  0
+end
+\end{minted}
+  \end{column}
+  \begin{column}{0.34\textwidth}
+    \textbf{Inside the outer branch}
+    \medskip
+    \code{x : integer()}\par
+    \code{y : binary()}\par
+    \medskip
+    {\small The outer condition can only be true when \emph{both} tests
+    succeed.\par}
+    \smallskip
+    \textbf{Elixir accepts the program.}
+  \end{column}
+\end{columns}
+
+\medskip
+\textbf{Paper snapshot: 7 of 11 other implementations miss this item.}\par
+{\small TypeScript, Flow, mypy, Pyright, Luau, \textsf{ty}, Pyrefly.\par}
+\note{Source: evaluation.tex, lines 119--180, and main.tex, appendix
+  If-T Benchmark Reproduction, lines 4731--4758. This is the Elixir adaptation
+  of the 13 core items, using the research branch with asserted function
+  annotations. It is not a claim that upstream Elixir supports those
+  annotations, nor a direct cross-language ranking. The code shown is the
+  body of the positive \texttt{nesting\_condition} example, from
+  ifT-benchmark/Elixir/main.ex, lines 251--273. The full benchmark asserts
+  (term(), term() -> integer()) on f/2. Preserve the nested conditional:
+  rewriting it as an and-test would change the point of the example.
+  The outer true branch requires both x to be an integer and y to be a binary.
+  In the rejected variant, replace the inner else: false with
+  else: is\_binary(y). Now y can be a binary while x is not an integer,
+  so the addition is unsafe. Elixir rejects that variant.
+  The paper's table and results-core.md record misses for TypeScript, Flow,
+  mypy, Pyright, Luau, ty, and Pyrefly; passes for Elixir, Typed Racket,
+  Sorbet, MLsem, and Typed Clojure. A miss means at least one expectation
+  fails, not necessarily that an invalid program was accepted.
+  This is a recorded benchmark snapshot, not a statement about latest versions.
+  Archived benchmark revision: e25b30a529d5196d8cf01e3fe6b1b5a9cd88b744.
+  Archived research compiler: 3684a541ed2ce9f83cd74fd46a7bae69081f017b.
+  All negative witnesses across the core items are rejected. The only core
+  miss remains alias, where a saved Boolean fails to refine the tested value.
+  Reference: Guo and Greenman, If-T: A
+  Benchmark for Type Narrowing, Programming 10(2), article 17, 2025.
+  Reproduction artifacts: https://github.com/gldubc/core-elixir-experiments.}
+\end{frame}
+
+\begin{frame}[t,label=perf-propagation]
+\frametitle{Removing dynamic propagation}
+\textbf{Compile the same 17 projects with and without propagation}
+
+\bigskip
+\begin{columns}[c,onlytextwidth]
+  \begin{column}{0.66\textwidth}
+    \begin{tikzpicture}[x=0.027cm,y=1cm]
+      \node[anchor=east,font=\small] at (-5,1.1) {Full checker};
+      \node[anchor=east,font=\small,align=right] at (-5,0) {Without dynamic\\propagation};
+      \fill[darkslateblue] (0,0.88) rectangle (94,1.32);
+      \fill[darkslateblue] (0,-0.22) rectangle (94,0.22);
+      \fill[typeOrange] (94,-0.22) rectangle (158,0.22);
+      \node[anchor=west,font=\small\bfseries] at (97,1.1) {94};
+      \node[anchor=west,font=\small\bfseries] at (161,0) {158};
+      \draw[gray!65] (0,-0.65) -- (160,-0.65);
+      \foreach \n in {0,80,160} {
+        \draw[gray!65] (\n,-0.65) -- (\n,-0.72);
+        \node[anchor=north,font=\scriptsize,text=gray] at (\n,-0.76) {\n};
+      }
+      \node[anchor=north,font=\small] at (80,-1.12) {Project type warnings};
+    \end{tikzpicture}
+  \end{column}
+  \begin{column}{0.29\textwidth}
+    {\fontsize{32}{36}\selectfont\bfseries\color{typeOrange}+64\par}
+    \smallskip
+    \textbf{additional warnings}\par
+    \medskip
+    {\small Six projects are unchanged.\par}
+  \end{column}
+\end{columns}
+
+\medskip
+{\small Dynamic propagation avoids requiring extra checks on results of
+function calls in existing code.\par}
+
+\note{Source: evaluation.tex, lines 260--333, table \texttt{dynamic\_propagation\_removal}.
+  Full checker: 94 project type warnings. Static variant: 158. Difference:
+  64, or approximately 68 percent. Warnings from dependencies are excluded.
+  The paper's static variant suppresses the dynamic component propagated
+  through strong applications, replacing t and dynamic() with t. These are
+  warning counts, not a validated count of additional bugs or false positives.
+  The six unchanged projects are HexPm, Ecto, Phoenix, MixSBOM, Nerves, and
+  AbsintheFederation. For example, using a returned integer-or-Boolean in
+  addition may require an explicit \texttt{is\_integer} check without propagation.
+  Reproduction artifacts: https://github.com/gldubc/core-elixir-experiments.}
+\end{frame}
+
+\begin{frame}[t,label=perf-cost]
+\frametitle{Compilation cost on production code}
+\textbf{Checking as a share of total compilation time, Elixir v1.19}
+
+\bigskip
+\begin{columns}[c,onlytextwidth]
+  \begin{column}{0.62\textwidth}
+    \begin{tikzpicture}[x=0.51cm,y=0.58cm]
+      \foreach \name/\share/\row in {Credo/2.4/4,Livebook/3.3/3,Hex/5.3/2,Phoenix/6.3/1,Remote/8.5/0} {
+        \node[anchor=east,font=\small] at (-0.2,\row) {\name};
+        \fill[darkslateblue] (0,\row-0.22) rectangle (\share,\row+0.22);
+        \node[anchor=west,font=\small\bfseries] at (\share+0.12,\row) {\share\%};
+      }
+      \draw[gray!65] (0,-0.55) -- (10,-0.55);
+      \foreach \n in {0,5,10} {
+        \draw[gray!65] (\n,-0.55) -- (\n,-0.68);
+        \node[anchor=north,font=\scriptsize,text=gray] at (\n,-0.75) {\n\%};
+      }
+    \end{tikzpicture}
+  \end{column}
+  \begin{column}{0.33\textwidth}
+    \textbf{Remote}\par
+    \smallskip
+    {\fontsize{30}{34}\selectfont\bfseries\color{darkslateblue}19.5\,s\par}
+    \smallskip
+    to check \textbf{24,292 modules}\par
+    \medskip
+    {\small Over 1 million lines of code\par
+    228.8\,s total compilation\par}
+  \end{column}
+\end{columns}
+
+\note{Source: implementation.tex, lines 307--332, v1.19 table. These are
+  shares of total compilation, not a controlled estimate of net added overhead.
+  Exact checking/total times (seconds): Credo 0.027/1.095; Livebook
+  0.102/3.051; Hex 0.065/1.232; Phoenix 0.029/0.461; Remote
+  19.476/228.801. Percentages reproduce the paper's reported rounded values.
+  Remote's 24,292 modules are counted; its over-one-million LoC is a
+  conservative estimate. The timing category includes deprecated-API and
+  function-definition checks, some of which replace earlier compiler checks.
+  These are the paper's v1.19 measurements, separate from the newer empirical
+  corpus experiments. The manuscript does not specify hardware, repeats, or
+  variance. Do not use the v1.18/v1.19 snapshots as a controlled speedup
+  comparison: the codebases evolved between evaluations.}
+\end{frame}
