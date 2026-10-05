@@ -117,86 +117,96 @@ and typed structs.\par}
 \definecolor{newsyntax}{RGB}{230,60,0}
 \newcommand{\newkw}[1]{\textcolor{newsyntax}{\textbf{#1}}}
 
-\begin{frame}[fragile]
-\frametitle{Future work: typing modules}\vspace{-3mm}
-\begin{block}{Today (Elixir 1.20): the type \code{module()} says nothing}
-\begin{minted}[fontsize=\footnotesize]{elixir}
-defmodule Counter do
+% verdict tags and corner labels for the code boxes (outside minted: colons are fine here)
+\newcommand{\bad}[1]{{\normalfont\small\textcolor{red!75!black}{\ding{55}~#1}}}
+\newcommand{\good}[1]{{\normalfont\small\textcolor{typeGreen}{\ding{51}~#1}}}
+\newcommand{\codeLabel}[1]{\hfill{\normalfont\scriptsize\textcolor{gray}{#1}}}
+\newcommand{\fwToday}{\codeLabel{today (Elixir 1.20)}}
+\newcommand{\fwTomorrow}{\codeLabel{tomorrow}}
+\newcommand{\badRun}{\bad{crashes at run time}}
+\newcommand{\goodInit}{\good{error: \texttt{Counter} expects \texttt{:ok}}}
+\newcommand{\goodSend}{\good{error: \texttt{true} is not an \texttt{integer()}}}
+\newcommand{\goodKey}{\good{error: no key \texttt{:a}}}
+\newcommand{\goodNum}{\good{error: \texttt{m.b} is \texttt{:ok}, not a number}}
+
+\begin{frame}[fragile,t]\transdissolve<2>
+\frametitle{Future work: typing modules}
+{\color{gray}Today the type \texttt{module()} says nothing about what a module implements\par}
+\bigskip
+\begin{block}{\vspace{-5mm}}
+\begin{onlyenv}<1>
+\begin{minted}[escapeinside=||,fontsize=\normalsize]{elixir}
+defmodule Counter do                          |\fwToday|
   @behaviour GenServer
   def init(:ok), do: {:ok, %{}}
-  def handle_call({:bump, k}, _from, s), do: ...
 end
-GenServer.start_link(Counter, :not_ok)    # no warning: crashes at run time
+GenServer.start_link(Counter, :not_ok)  |\badRun|
 \end{minted}
-\vspace{-1mm}
-\end{block}
-\pause
-\vspace{-2mm}
-\begin{exampleblock}{Tomorrow: typed behaviours}
-\begin{minted}[fontsize=\footnotesize,escapeinside=||]{elixir}
-defmodule Counter do
-  |\newkw{\$behaviour}| GenServer|\newkw{[}|init_arg: :ok, call_msg: {:bump, atom()}, reply: integer()|\newkw{]}|
-  |\newkw{\$opaque}| state = %{atom() => integer()}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{minted}[escapeinside=||,fontsize=\normalsize]{elixir}
+defmodule Counter do                          |\fwTomorrow|
+  |\newkw{\$behaviour}| GenServer|\newkw{[}|init_arg: :ok|\newkw{]}|
   def init(:ok), do: {:ok, %{}}
-  def handle_call({:bump, k}, _from, s), do: ...
 end
-GenServer.start_link(Counter, :not_ok)    # error: the init_arg of Counter is :ok
+GenServer.start_link(Counter, :not_ok)  |\goodInit|
 \end{minted}
-\vspace{-1mm}
-\end{exampleblock}
-{\small\color{gray}Joint work with A.~Boussaa, A.~Bretagne and J.~Valim; proposed syntax, not final.\par}
+\end{onlyenv}
+\end{block}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{Future work: typing processes}\vspace{-3mm}
-\begin{block}{Today (Elixir 1.20): the type \code{pid()} says nothing}
-\begin{minted}[fontsize=\footnotesize]{elixir}
-send(self(), true)
-receive do y -> IO.puts(y + y) end        # no warning: crashes at run time
-\end{minted}
-\vspace{-1mm}
-\end{block}
-\pause
-\vspace{-2mm}
-\begin{exampleblock}{Tomorrow: \code{pid(t)}, where \code{t} is the type of the messages the process accepts}
-\begin{minted}[fontsize=\footnotesize,escapeinside=||]{elixir}
-|\newkw{\$interface}| {:add, integer()} or boolean()
+\begin{frame}[fragile,t]\transdissolve<2>
+\frametitle{Future work: typing processes}
+{\color{gray}Today the type \texttt{pid()} says nothing about the messages a process accepts\par}
+\bigskip
+\begin{block}{\vspace{-5mm}}
+\begin{onlyenv}<1>
+\begin{minted}[escapeinside=||,fontsize=\normalsize]{elixir}
+                                              |\fwToday|
 spawn(fn ->
-  send(self(), true)                      # accepted: boolean() is in the interface
-  receive do
-    {:add, y} -> y + 1                    # y : integer()
-    y -> y + y                            # error: y : boolean()
-  end
+  send(self(), true)
+  receive do y -> IO.puts(y + y) end    |\badRun|
 end)
 \end{minted}
-\vspace{-1mm}
-\end{exampleblock}
-{\small\color{gray}Joint work with L.~Padovani (Bologna) and D.~Varacca (\'Evry); later, mailbox types to ensure liveness.\par}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{minted}[escapeinside=||,fontsize=\normalsize]{elixir}
+|\newkw{\$interface}| integer()                            |\fwTomorrow|
+spawn(fn ->
+  send(self(), true)                    |\goodSend|
+  receive do y -> IO.puts(y + y) end
+end)
+\end{minted}
+\end{onlyenv}
+\end{block}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{Future work: record type comprehensions}\vspace{-3mm}
-\begin{block}{Today (Elixir 1.20): the result of \texttt{Map.intersect/2} is \texttt{dynamic()}}
-\begin{minted}[fontsize=\footnotesize]{elixir}
+\begin{frame}[fragile,t]\transdissolve<2>
+\frametitle{Future work: record type comprehensions}
+{\color{gray}Today \texttt{Map.intersect/2} and its kin return \texttt{dynamic()}: the keys are lost\par}
+\bigskip
+\begin{block}{\vspace{-5mm}}
+\begin{onlyenv}<1>
+\begin{minted}[escapeinside=!!,fontsize=\normalsize]{elixir}
+                                              !\fwToday!
 m = Map.intersect(%{a: 1, b: "x"}, %{b: :ok, c: 2})
-m.a                                       # no warning: crashes at run time
-m.b + 1                                   # no warning: crashes at run time
+m.a                                     !\badRun!
+m.b + 1                                 !\badRun!
 \end{minted}
-\vspace{-1mm}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{minted}[escapeinside=!!,fontsize=\normalsize]{elixir}
+!\spec! (a, b) -> !\newkw{\%\{k in keyof(a) and keyof(b) | b[k]\}}!  !\fwTomorrow!
+m = Map.intersect(%{a: 1, b: "x"}, %{b: :ok, c: 2})
+m.a                                     !\goodKey!
+m.b + 1                                 !\goodNum!
+\end{minted}
+\end{onlyenv}
 \end{block}
-\pause
-\vspace{-2mm}
-\begin{exampleblock}{Tomorrow: record types defined by comprehension over the keys}
-{\small Type of \texttt{Map.intersect/2}: the keys \texttt{k} common to both maps, with their type in the second\par}
-\begin{minted}[fontsize=\footnotesize,escapeinside=!!]{elixir}
-!\spec! (a, b) -> %{k in keyof(a) and keyof(b) | b[k]} when a: map(), b: map()
-m = Map.intersect(%{a: 1, b: "x"}, %{b: :ok, c: 2})   # m : %{b: :ok}
-m.a                                       # error: unknown key .a
-m.b + 1                                   # error: :ok is not a number
-\end{minted}
-\vspace{-1mm}
-\end{exampleblock}
-{\small\color{gray}The same comprehensions type \texttt{Map.take}, \texttt{drop}, \texttt{merge}, \texttt{filter}, \ldots; syntax not final.\par}
+\medskip
+{\small\color{gray}The same comprehensions type \texttt{Map.take}, \texttt{drop}, \texttt{merge}, \texttt{filter}, \ldots\par}
+\vfill
+{\scriptsize\color{gray}Modules: with A.~Boussaa, A.~Bretagne, J.~Valim.\quad Processes: with L.~Padovani, D.~Varacca.\quad Syntax not final.\par}
 \end{frame}
 
 \end{document}
