@@ -88,34 +88,25 @@ patterns that traditional type systems cannot describe:
 % language tag in the top right corner of TypeScript code boxes (put at the end of the first line)
 \newcommand{\tsLabel}{\hfill\textcolor{gray}{\sffamily{\scriptsize T}{\tiny YPE}{\scriptsize S}{\tiny CRIPT}}}% faked small caps: the sans font (Carlito) has none
 \begin{frame}[fragile]\transdissolve
-\frametitle{1. Branching and discriminated unions}\vspace{-5mm}
-\small
-\begin{minted}{typescript}
-type Status = "pending" | "success" | "error";!\tsLabel!
-type Result = string | number | boolean;
-function processStatus(input: Status): Result {
-  switch (input) {
-    case "pending":
-      return "Processing...";       // returns string
-    case "success":
-      return 200;                   // returns number
-    case "error":
-      return false;                 // returns boolean
-    default:
-      return "Unknown status";      // returns string
-  }
+\frametitle{1. Branching and discriminated unions}
+\begin{minted}[fontsize=\normalsize]{typescript}
+type Status = "success" | "error";!\tsLabel!
+function report(s: Status): number | string {
+  if (s === "success") return 200;
+  return "failed";
 }
 \end{minted}
+{\small\color{gray}\texttt{"success"} and \texttt{"error"} are types with one value; their union types the input,
+and the result is \texttt{number} or \texttt{string} depending on the branch\par}
 \pause
-\vspace{-13mm}
-
-% Discriminated unions are a common pattern in dynamic languages to handle different types of data structures that share some common properties.
-\begin{minted}{typescript}
-type PaymentMethod = !\tsLabel!
-  | { medium: "credit_card"; cardNumber: string; cvv: string }
-  | { medium: "paypal"; email: string }
-  | { medium: "transfer"; accountNumber: string; routingNumber: string };
+\vspace{-2mm}
+\begin{minted}[fontsize=\normalsize]{typescript}
+type Payment = !\tsLabel!
+  | { kind: "card";   cardNo: string }
+  | { kind: "paypal"; email: string };
 \end{minted}
+\vspace{-1mm}%
+{\small\color{gray}A \emph{discriminated union}: the field \texttt{kind} tells which variant a payment is\par}
 \end{frame}
 
 
