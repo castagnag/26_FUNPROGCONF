@@ -7,16 +7,23 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Putting the theory to work: Elixir}
+\frametitle{Putting the theory to work: Elixir}\vspace{-3mm}
+\begin{block}{The language}
 \begin{itemize}
-\item<1-> Elixir is a dynamic language with a strong emphasis on metaprogramming
-\item<2-> It is a functional language with a syntax similar to Ruby
-\item<3-> It is built on top of the Erlang VM, which provides a powerful runtime system for distributed and fault-tolerant applications
-\item<4-> It has a rich ecosystem of libraries and frameworks and a strong community of nearly 100K developers (with the highest median salaries cf.\  2024 Stack Overflow survey)
-\item<5-> It is used in production by companies like Discord, Pinterest, PepsiCo, ...
-\item<6-> Since 2021 we have been collaborating with José Valim, the creator of Elixir, and the Dashbit team to develop a type system for Elixir.
-\item<7-> The static type system, based on our set-theoretic types, is in the Elixir compiler since v1.17 and covers the whole language since v1.20 (current version: 1.20.4).
+\item Dynamic and functional, Ruby-like syntax, strong emphasis on metaprogramming
+\item Runs on the Erlang VM: distributed and fault-tolerant applications
+\item Rich ecosystem of libraries and frameworks, nearly 100K developers
+\item In production at Apple, Discord, PepsiCo, BBC, Adobe, Spotify, \ldots
 \end{itemize}
+\end{block}
+
+\begin{block}{The type system}
+\begin{itemize}
+\item Since 2021, in collaboration with José Valim (creator of Elixir) and the Dashbit team
+\item Based on our set-theoretic types: in the compiler since v1.17 (June 2024),\\
+      covers the whole language since v1.20 (current version: 1.20.4, August 2026)
+\end{itemize}
+\end{block}
 \end{frame}
 
 
@@ -351,7 +358,7 @@ def logical_or(x, _), do: x
 
 
 
-\section{Guard Analysis}
+\section{Guard analysis}
 \begin{frame}
 \frametitle{Outline} 
 \tableofcontents[currentsection]

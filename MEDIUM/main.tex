@@ -17,8 +17,9 @@
 Elisir di sì perfetta,\\[-1.5mm]
 di sì rara qualità,\\[-1.5mm]
 ne sapessi la ricetta,\\[-1.5mm]
-conoscessi chi ti fa!
-}\\[-6.5mm]
+conoscessi chi ti fa!\\[-0.5mm]
+{\upshape\tiny --- G.~Donizetti, \textit{L'elisir d'amore}}
+}\\[-8mm]
 Guillaume DUBOC {\small(University of Bristol)}}
 %% These additional packages are used within the document:
 \usepackage[overlay,absolute,
@@ -51,6 +52,9 @@ Guillaume DUBOC {\small(University of Bristol)}}
   \setbeamerfont{block title}{size=\large,shape=\bf}
   \begin{block}#2{{#1}\vspace{-1.5mm}}}{\end{block}}
 
+\setbeamerfont{section in toc}{size=\small}
+\setbeamerfont{subsection in toc}{size=\footnotesize}
+
 %%%% UNCOMMENT THE FOLLOWING LINE TO REMOVE SLIDE NUMBERS
 %\setbeamertemplate{footline}{}
 
@@ -63,12 +67,12 @@ Guillaume DUBOC {\small(University of Bristol)}}
       \footnotesize\textcolor{white}{$\lambda$ Func Prog Conf, 14 Oct 2026, Stockholm}
     \end{textblock}}
 
-\section{Set-Theoretic Types and Dynamic Languages}
+\section{Set-theoretic types and dynamic languages}
 \input{set-theoretic}
 
 \input{core}
 
-\section{Gradual Typing}
+\section{Gradual typing}
 \input{gradual}
 
 \section{Integration in Elixir}

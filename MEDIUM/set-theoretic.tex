@@ -7,39 +7,43 @@
 %%  SLIDE 2 — Why static typing for dynamic languages?
 %% ----------------------------------------------------------
 \begin{frame}
-\frametitle{Why Static Typing for Dynamic Languages?}
+\frametitle{Why static typing for dynamic languages?}
 
+\vspace{-3mm}
+\small
 \begin{columns}[T,onlytextwidth]
   \begin{column}{0.48\textwidth}
-    \begin{block}{Catch bugs early}\setlength{\baselineskip}{0.85\baselineskip}
-      Type errors are found at compile time, before the code ever runs in
-      production.
-    \end{block}
-    \vspace{0mm}
-    \begin{block}{Living documentation}\setlength{\baselineskip}{0.85\baselineskip}
-      Types describe exactly what a function expects and returns, and they
-      are always consistent with the code.
-    \end{block}
-    \vspace{0mm}
-    \begin{block}{Better tooling}\setlength{\baselineskip}{0.85\baselineskip}
-      Precise auto-completion, safe refactoring, and IDE navigation all
-      rely on type information.
+    \begin{block}{Why static types?}\setlength{\baselineskip}{0.85\baselineskip}\setlength{\leftmargini}{1.2em}
+      \begin{itemize}\setlength{\itemsep}{4pt}
+        \item \textbf{Catch bugs early}: type errors are found at compile
+              time, before the code runs in production
+        \item \textbf{Living documentation}: types state what a function
+              expects and returns, always consistent with the code
+        \item \textbf{Tooling}: precise auto-completion, IDE navigation,
+              and safe refactoring
+      \end{itemize}
     \end{block}
   \end{column}
   \begin{column}{0.48\textwidth}
-    \begin{block}{Safer refactoring}
-      Rename or restructure a codebase with confidence: the type
-      checker catches every inconsistency.
+    \begin{block}{Why not existing solutions?}\setlength{\baselineskip}{0.85\baselineskip}\setlength{\leftmargini}{1.2em}
+      \begin{itemize}\setlength{\itemsep}{4pt}
+        \item Typed variants developed by large companies (TypeScript,
+              Flow, Hack) are \textbf{language-specific} and give
+              \textbf{no soundness guarantee}
+        \item Full rewrites into statically typed languages require
+              \emph{years of work} and major resources
+        \item Needed: a type system that is \textbf{sound},
+              \textbf{gradual}, \textbf{automated}, and \textbf{open}
+      \end{itemize}
     \end{block}
-    \vspace{3mm}
-    \begin{alertblock}{Regulatory compliance}
-      EU and US regulations increasingly \textbf{require formally
-      certified software} (CRA, NIST guidelines, \ldots).  A
-      \emph{\sl sound} type system is a concrete, mechanically verifiable
-      step in that direction. No manual-proofs required.
-    \end{alertblock}
   \end{column}
 \end{columns}
+\begin{alertblock}{Regulatory compliance}\setlength{\baselineskip}{0.85\baselineskip}
+  EU and US regulations increasingly \textbf{require evidence of
+  software assurance} (CRA, NIST guidelines, \ldots).  A
+  \emph{sound} type system is a concrete, mechanically verifiable
+  step in that direction. No manual proofs required.
+\end{alertblock}
 
 \end{frame}
 
@@ -47,14 +51,14 @@
 %%  SLIDE 3 — The challenge
 %% ----------------------------------------------------------
 \begin{frame}
-\frametitle{The Challenge: Dynamic Code Does Not Fit Classic Types}
+\frametitle{The challenge: dynamic code does not fit classic types}
 
 Dynamic languages are expressive \emph{because} they use programming
 patterns that traditional type systems cannot describe:
 
 \bigskip
 
-\begin{block}{1. \; Non-uniform data structures / branching}\setlength{\baselineskip}{0.8\baselineskip}
+\begin{block}{1. \; Branching and discriminated unions}\setlength{\baselineskip}{0.8\baselineskip}
   A dedicated tag field in a record or a tuple is used as a discriminant to determine the type of the remaining values (tagged unions).   \textbf{Union types and singleton types} are needed.
 \end{block}
 
@@ -80,7 +84,7 @@ patterns that traditional type systems cannot describe:
 \subsection{Branching, overloading, and pattern matching}
 
 \begin{frame}[fragile]\transdissolve
-\frametitle{1. Branching and discriminated unions}\vspace{-7mm}
+\frametitle{1. Branching and discriminated unions}\vspace{-5mm}
 \small
 \begin{minted}{typescript}
 type Status = "pending" | "success" | "error";
@@ -99,7 +103,7 @@ function processStatus(input: Status): Result {
 }
 \end{minted}
 \pause
-\vspace{-10mm}
+\vspace{-13mm}
 
 % Discriminated unions are a common pattern in dynamic languages to handle different types of data structures that share some common properties.
 \begin{minted}{typescript}
@@ -122,16 +126,14 @@ function double (x) {
     return (typeof(x) === "number") ? 2*x : x.concat(x);
 }
 \end{minted}
-\textcolor<4>{red}{If applied to an integer returns an integer, if applied to a string returns a string}
+\textcolor<3>{red}{If applied to a number returns a number, if applied to a string returns a string}
   \pause
 \begin{exampleblock}{Use set-theoretic types}
   \begin{itemize}
-    \pause
-     \item Naive solution: union types
-       \centerline{\pb{(number|string)$\to$(number|string)}}
+     \item Naive solution, union types:\quad \pb{(number$\vee$string)$\to$(number$\vee$string)}\\
+       {\small\color{gray}\pb{double(42)} has type \pb{number$\vee$string}, so \pb{double(42)+1} is rejected}
        \pause\pause
-     \item Better solution: intersection types
-       \centerline{\pb{\color<6>{darkred}(number$\to$number) \& (string$\to$string)}}
+     \item Better solution, intersection types:\quad \pb{\color<5>{darkred}(number$\to$number) $\wedge$ (string$\to$string)}
   \end{itemize}
 \end{exampleblock}
 \end{frame}
@@ -163,7 +165,7 @@ function logicalOr(x, y) {
 
 \begin{exampleblock}<2->{Narrowing on the result of an application}\small
 {\tt
-\ty{} \scT{Falsy} = \scV{false}\,\scO{|}\,\scV{0}\,\scO{|}\,\scV{""}\,\scO{|}\,\scV{null}\,\scO{|}\,\scV{undefined}\,\scO{|}\,\scV{NaN};\qquad\quad \ty{} \scT{Truthy} = \scO{$\neg$}\scT{Falsy};\\
+\ty{} \scT{Falsy} = \scV{false}\scO{$\,\vee\,$}\scV{0}\scO{$\,\vee\,$}\scV{""}\scO{$\,\vee\,$}\scV{null}\scO{$\,\vee\,$}\scV{undefined}\scO{$\,\vee\,$}\scV{NaN};\qquad\quad \ty{} \scT{Truthy} = \scO{$\neg$}\scT{Falsy};\\
 toBoolean : (\scT{Truthy} \scT{$\to$} \scV{true}) \scO{$\wedge$} (\scT{Falsy} \scT{$\to$} \scV{false})\par}
 \uncover<3->{\textbf{\color{darkslateblue}\texttt{toBoolean(x)} is an application, not a type test: its intersection type narrows \texttt{x}}\par}
 \uncover<4->{\tt logicalOr : \scT{$\forall$}\scX{$\alpha$},\scX{$\beta$}. ((\scX{$\alpha$}\scO{$\wedge$}\scT{Truthy}, \scT{Any}) \scT{$\to$} \scX{$\alpha$}) \scO{$\wedge$} ((\scT{Falsy}, \scX{$\beta$}) \scT{$\to$} \scX{$\beta$})\par}
@@ -174,20 +176,27 @@ toBoolean : (\scT{Truthy} \scT{$\to$} \scV{true}) \scO{$\wedge$} (\scT{Falsy} \s
 
 
 \begin{frame}[fragile]
-\frametitle{3. Precise typing of pattern matching (I)}
-Consider the following possibly recursive types:
-{\Bl$$\T\ ::=\  ~\textcolor{magenta}{\alpha} \,\mid\, \textcolor{magenta}{c} \,\mid\,\Bool\,\mid\,\Int\,\mid\,\pair\T\T\,\mid\,\T\To\T \,\mid\,{\color{darkgreen}\T\Or\T}\,\mid\,{\color{darkgreen}\T\!\And\!\T} \,\mid\, {\color{darkgreen} \neg\T}$$}
-\pause
+\frametitle{3. Precise typing of pattern matching (I)}\vspace{-1.3mm}
+
+We consider the following possibly recursive types:
+
+{\Bl$$\T\ ::=\  \Bool\,\mid\,\Int\,\mid\,\pair\T\T\,\mid\,\T\To\T \,\mid\,{\color{darkgreen}\T\Or\T}\,\mid\,{\color{darkgreen}\T\!\And\!\T} \,\mid\, {\color{darkgreen} \neg\T}\,\mid\,{\color{darkred}\Any}\,\mid\,{\color{darkred}\Empty}\,\mathrel{\textcolor<-3>{white}{\mid}}\,~\textcolor<-3>{white}{\textcolor<4>{magenta}{\alpha}}\,\mathrel{\textcolor<-4>{white}{\mid}}\, \textcolor<-4>{white}{\textcolor<5>{magenta}{c}} $$}%
+% handwritten annotations (from the LONG version, background removed)%
+\only<2>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-settheore.pdf}\end{textblock}}%
+\only<3>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-topbottom.pdf}\end{textblock}}%
+\only<4>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-variables.pdf}\end{textblock}}%
+\only<5>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-singleton.pdf}\end{textblock}}%
+\pause[6]%
 And let us type the following pattern matching expression:
- 
+
 \hspace*{5mm}{\Bl$\texttt{ match }  e  \texttt{ with } p_1 \texttt{ -> } e_1 \texttt{ | } p_2\texttt{ -> } e_2$}
 
 where patterns are defined as follows:
-\centerline{$\Bl p ::= x \ \mid\  \patpair{p}{p} \ \mid\ \pator{p}{p}\ \mid\ {p}\,\textsf{and}\,{p} $}
-\pause
-If we interpret types as set of values
+\centerline{$\Bl p ::= c \ \mid\ x \ \mid\  \patpair{p}{p} \ \mid\ p\mathbin{\textsf{or}}p\ \mid\ p\mathbin{\textsf{and}}p $}
+\pause%
+If we interpret types as sets of values
 \centerline{$\Bl
-t = \{ v\mid v\text{ is a value of type }t\}$}
+\sem{\T} = \{ v\mid v\text{ is a value of type }\T\}$}
 \pause
 then \textbf{\color{darkslateblue}the set of all values that match a pattern is a type}
 \centerline{\color{magenta}
@@ -219,15 +228,15 @@ Suppose that $\Bl e:\T$\\[-2mm]
 
 \pause
 
-  - To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T{\color<8->{magenta}\,\mypmb<8->{\backslash}}\accept{p_1}){\color<8->{magenta}\mypmb<8->{\And}}\accept{p_2}$;}\hspace*{18mm} {\textcolor{gray}{\small($\T_1\setminus\T_2$ stands for $\T_1\!{\And}\!\textcolor<8->{magenta}{\neg}{\T_2}$)}}
+  - To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T{\color<8->{magenta}\,\mypmb<8->{\backslash}}\accept{p_1}){\color<8->{magenta}\mypmb<8->{\And}}\accept{p_2}$;}\hspace*{18mm} {\textcolor{gray}{\small($\texttt{S}\setminus\T$ stands for $\texttt{S}\!{\And}\!\textcolor<8->{magenta}{\neg}{\T}$)}}
 
 \pause
 
-  - The type of the match expression is {\color{blue}$\T_1{\color<8->{magenta}\mypmb<8->{\Or}} T_2$ }.
+  - The type of the match expression is {\color{blue}$\T_1{\color<8->{magenta}\mypmb<8->{\Or}}\T_2$}.
 
 \pause
 
-  - Pattern matching is exhaustive if $\color{blue}\T\leq\accept{p_1}{\color<8->{magenta}\mypmb<8->{\Or}}\accept{p_2}$;
+  - Pattern matching is exhaustive if $\color{blue}\T\leq\accept{p_1}{\color<8->{magenta}\mypmb<8->{\Or}}\accept{p_2}$.
 
 
 \pause\pause
@@ -236,7 +245,7 @@ Suppose that $\Bl e:\T$\\[-2mm]
 \begin{mathpar}\Bl
 \infer[{[Match]}]
 {\Gamma\vdash e:\T\and\Gamma, \T\!\!\And\!\!\accept{p_1\!}/p_1\vdash e_1:\T_1\and \Gamma, \T\setminus\accept{p_1\!}/p_2\vdash e_2:\T_2}
-{\Gamma\vdash \texttt{match } e \texttt{ with }p_1 \texttt{->} e_1 \texttt{ | }p_1 \texttt{->} e_2 : \T_1\Or\T_2 }\mbox{\small($\T\leq\accept{p_1\!}\Or\accept{\!p_2\!}$)}
+{\Gamma\vdash \texttt{match } e \texttt{ with }p_1 \texttt{->} e_1 \texttt{ | }p_2 \texttt{->} e_2 : \T_1\Or\T_2 }\mbox{\small($\T\leq\accept{p_1\!}\Or\accept{\!p_2\!}$)}
 \end{mathpar}
 \vspace{-4mm}
 
@@ -244,32 +253,45 @@ Suppose that $\Bl e:\T$\\[-2mm]
 where $\Bl \T/p$ is the type for the capture variables in $\Bl p$ when it is matched against values in $\Bl \T$.
 
 \only<10>{\begin{textblock}{5}(0,0)
-\includegraphics[scale=1]{images/slide-caseexp.pdf}
+\includegraphics[scale=1]{images/hw-caseexp.pdf}
 \end{textblock}}
 \end{frame}
 
 \subsection{Semantic subtyping}
 \begin{frame}
-\frametitle{Semantic subtyping} \vspace{-5mm}
+\frametitle{Semantic subtyping}\vspace{-4mm}
 
-Many dynamic languages support union and intersection types: TypeScript, Flow, Hack, Python, Julia, and Ceylon. Negation types are less common: TypeScript (with the `Exclude` utility type) and Scala (with `Not` type constraints).
+Union and intersection types are now common (TypeScript, Python, Scala 3, Ceylon, \ldots);
+negation types are rare.
 
-\pause\smallskip
+\smallskip
+\textbf{\color{darkslateblue}Our approach: \emph{semantic subtyping}, i.e., subtyping defined by what types mean.}
 
-\textbf{What differentiates our approach is the use of \emph{semantic subtyping}: i.e., the use of type semantics to define  the subtyping relation for union, intersection, and negation types.}
+\smallskip
+\begin{columns}[T,onlytextwidth]
+  \begin{column}{0.58\textwidth}
+    \begin{block}{How does it work?}
+      \begin{enumerate}\setlength{\itemsep}{1pt}
+        \item Types denote sets of values: $\sem{t}$
+        \item Connectives are set operations:\\
+              $\sem{t\vee s}=\sem{t}\cup\sem{s}\quad\sem{t\wedge s}=\sem{t}\cap\sem{s}$\\
+              $\sem{\neg t}=\sem{t}^{\complement}$
+        \item Subtyping is inclusion:\quad $t\leq s \iff \sem{t}\subseteq\sem{s}$
+        \item Derive algorithms to decide $\leq$ and compute type operators
+      \end{enumerate}
+    \end{block}
+  \end{column}
+  \begin{column}{0.39\textwidth}
+    \begin{block}{Why not subtyping rules?}
+      Rule-based systems end up incomplete and fragile: e.g.,\\[1mm]
+      \centerline{$(\Int\vee\Bool)\times\Int\ \leq$}
+      \centerline{$(\Int\times\Int)\vee(\Bool\times\Int)$}\vspace{1mm}
+      may not be derivable.
 
-\smallskip \pause
-\begin{block}{Why not just write down subtyping rules?} \setlength{\baselineskip}{0.8\baselineskip}
-  Many languages do exactly that — and end up with an incomplete,
-  fragile system: e.g., 
-  $\neg(A\vee B)$ not a subtype of $\neg A\wedge\neg B$.  With semantic subtyping it comes for \textbf{free}
-\end{block}\pause
-\textbf{\textcolor{darkslateblue}{How does it work?}}
-\begin{enumerate}
-  \item<4-> Define a set-theoretic interpretation of types as sets of values
-  \item<5-> Define union, intersection, and negation types as set-theoretic operations
-  \item<6-> Define the subtyping relation as a set-theoretic inclusion relation
-  \item<7-> Deduce from this how to decide the subtyping relation and compute type operators
-  \end{enumerate}
+      \smallskip
+      With semantic subtyping, all set-theoretic laws hold for \textbf{free}.
+    \end{block}
+  \end{column}
+\end{columns}
 
 \end{frame}
