@@ -1,0 +1,210 @@
+
+\begin{frame}
+\frametitle{Outline}
+\tableofcontents[currentsection]
+\end{frame}
+
+\begin{frame}
+\frametitle{Status of the Integration}\vspace{-4mm}
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item v1.17 (June 2024): gradual set-theoretic types for atoms, maps, basic types
+\item v1.18: type-checked function calls, inference for patterns and return types
+\item v1.19 (Oct.\ 2025): all constructs; function types; \textit{protocols} (\`a la type classes)
+\item \textbf{v1.20 (June 2026, now 1.20.4): typing covers the whole language}: full guard analysis, intersection types inferred for multi-clause functions
+\end{itemize}
+\textcolor{darkslateblue}{\textbf{No syntactic change, no type annotation required}}
+\pause\smallskip
+
+\small
+\begin{tabular}{|l|r|r|r|r|r|r|}
+\hline\rowcolor{violet2}
+Codebase (v1.19) & \multicolumn{1}{c|}{LoC} & \multicolumn{1}{c|}{Files} & Modules & \makecell{Type Checking\\ Time} & \makecell{Total Compilation\\ Time} & \multicolumn{1}{c|}{\%}\\[-1pt]
+\hline
+Remote & $>$1,000,000 & $>$10,000 & 24,292 & 19.476 s & 228.801 s & 8.5\\[-1.5pt]
+\rowcolor{violet1}
+Livebook & 61,170 & 256 & 258 & 0.102 s & 3.051 s & 3.3\\[-1.5pt]
+Credo & 28,493 & 251 & 314 & 0.027 s & 1.095 s & 2.4\\[-1.5pt]
+\rowcolor{violet1}
+Phoenix & 22,497 & 74 & 110 & 0.029 s & 0.461 s & 6.3\\[-1.5pt]
+Hex & 15,476 & 196 & 207 & 0.065 s & 1.232 s & 5.3\\[-1pt]
+\hline
+\end{tabular}\pause
+
+\medskip
+\textbf{\textcolor{darkslateblue}{\large Type checking takes 2.4\% to 8.5\% of the compilation time}}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Status of the Integration}\vspace{-3mm}
+\begin{itemize}
+\item Very positive feedback from developers on versions 1.17 to 1.20
+\item No syntactic changes and no annotations required: particularly appreciated
+\item Errors found in tested and reviewed code, in production for months or years
+\end{itemize}
+
+\medskip\pause
+
+\begin{block}{Real-world Bug Discoveries}
+\begin{itemize}
+    \setlength{\itemsep}{0pt}
+\item \textbf{Phoenix} (deployed on 14,600+ websites): an exception handler reads the \code{message} field, which not every exception defines: the error branch can itself crash
+\item \textbf{Remote} (24,000 modules): \code{String.Chars} called on a tuple in a rarely executed error branch, undetected by tests
+\item \textbf{Dead code}: 14 fixes, at least 179 lines removed in 9 projects (Postgrex, Flame, LiveView, Ecto, ExDoc, Livebook, Ash, Phoenix, Spitfire)
+\item \textbf{v1.20}: porting one company application to 1.20 revealed about 500 problems missed by 1.19, mostly dead code but also real bugs\vspace{-1mm}
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{\mbox{Several Languages use (more or less) Semantic Subtyping:}}
+\hspace*{-0.8em}%
+\begin{minipage}{1.06\textwidth}
+  \setlength{\leftmargini}{1.9em}
+\begin{itemize}\setlength{\itemsep}{2pt}  \setlength{\rightmargin}{-12pt} % reduce right margin (use full width)
+
+  \item \textbf{Elixir} — in the compiler since v1.17 (2024), whole
+        language since v1.20 (2026)
+        % (Discord, Pinterest,PepsiCo, \ldots)
+
+  \item \textbf{Python (\textsf{ty})} — Astral's high-performance type
+        checker reuses data-structures and optimisations developed for
+        Elixir, and is migrating to a full semantic subtyping implementation.
+
+  \item \textbf{Ballerina} (WSO2) — uses semantic subtyping since its
+        Swan Lake release
+
+  \item \textbf{Luau} (Roblox) — falls back to semantic subtyping when
+        syntactic subtyping is insufficient
+
+  \item \textbf{Erlang} — \emph{RPTU} (Kaiserlautern) develops \textsl{Ethylizer} which reconstructs set-theoretic types  for unannotated
+        code by using our semantic subtyping algorithms and techniques; \\
+        \emph{Meta} develops \textsl{eqWAlizer} to type WhatsApp's Erlang codebase, building on our semantic-subtyping-based gradual typing.
+
+  \item \textbf{R} — \emph{U.\ Karlova} (Prague) is developing a type system for R
+        based on semantic subtyping
+
+  \item \textbf{Julia} — core developers cite semantic subtyping as
+        direct inspiration for Julia's type system
+
+  \item \textbf{CDuce} and its spin-offs SSTT and MLsem — the original
+        theoretical proving grounds
+\end{itemize}
+\end{minipage}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Future work}\vspace{-2mm}
+
+\textbf{\color{darkslateblue}Types for the Elixir Module System:}\\
+Currently, only the type \code{module()} is supported, while we want a finer-grained typing of functions manipulating modules. We are developing solutions applicable to other languages.
+% \vspace{-5mm}
+% \begin{block}{\vspace{-25mm}}
+% \begin{minted}{elixir}
+% !\spec! (X: Stack[el=bool], sx: X.stack, Y: Stack[el=bool], sy: Y.stack) -> Y.stack
+% def move(X, sx, Y, sy), do: Y.push(sy, X.top(sx))   
+%\end{minted}
+%\end{block}
+
+\bigskip
+\textbf{\color{darkslateblue}Record types comprehensions:}\\
+We want to type standard library functions that manipulate records with \emph{first-class} keys, such as \code{Map.intersect/2} and \code{Map.reject/2}.
+% \definecolor{typeconstructorgreen}{rgb}{0.0, 0.5, 0.25}  % Nice green for type constructors
+% \definecolor{keyvarblue}{rgb}{0.1, 0.3, 0.7}              % Nice blue for key variables
+% \newcommand{\keyof}[1]{\textcolor{typeconstructorgreen}{\mathsf{keyof}}(#1)}
+% \newcommand{\tvar}{\textcolor{keyvarblue}{\boldsymbol{\theta}}}
+% \begin{tabular}{@{}l@{\;\;}l@{\;\;}l@{}}
+%  \texttt{intersect/2}
+%   & $(\alpha,\, \beta) \to \%\{\,\tvar \in \keyof{\alpha} \land \keyof{\beta} \mid \beta[\tvar]\,\}\quad\texttt{when } \alpha,\beta\texttt{:map()}$  \\[6pt]
+% \texttt{reject/2}
+%   & $(\alpha, ((\keyof{\alpha} \to \texttt{term}) \,\wedge\, ( \keyof{\alpha}\wedge\beta)\to\neg\texttt{truthy})) \to $\\
+%   &\qquad\qquad\qquad\qquad
+%      $\%\{\, \tvar\in \keyof{\alpha}\setminus\beta \mid \alpha[\tvar]\,\} \quad\texttt{when } \alpha\texttt{:map()}$\\[3pt]
+% \end{tabular}
+
+\bigskip
+\textbf{\color{darkslateblue}Types for processes and message passing:}
+Currently, only the type \code{pid()} is supported.
+
+In collaboration with \emph{Università degli Studi di Bologna} (Italy) and \emph{Université d'Evry} (France), we are working on typing processes with the set of messages they can receive and, later, we plan to introduce Mailbox types, to ensure liveness properties.
+
+\end{frame}
+\begin{frame}
+\frametitle{Future work}\vspace*{-5mm}
+
+\textbf{\color{darkslateblue}Tooling:} We are developing migration tools, IDEs, error messages, .... In particular, in collaboration with \emph{Ca' Foscari} (Venice), we are  feeding LLMs with automatic translations of TypeSpecs into Elixir Types together with the type errors they produce to improve the quality of LLM-generated type annotations and error messages.
+
+\bigskip\medskip
+
+\textbf{\color{darkred}Application to Ruby:} We are collaborating with \textbf{NII} and members of the Ruby team to apply our gradual typing solutions to Ruby, which has a syntax similar to Elixir but is object-oriented and has a more complex type system (with classes, modules, \ldots).
+
+
+\end{frame}
+
+
+
+%% ----------------------------------------------------------
+%%  SLIDE 10 — Why this is the most promising approach
+%% ----------------------------------------------------------
+\begin{frame}
+\frametitle{A Proven Approach}
+
+\begin{enumerate}\setlength{\itemsep}{4pt}
+
+  \item \textbf{\color{darkslateblue}Faithful to the semantics.}
+    $T_1 \leq T_2$ means exactly $\llbracket T_1\rrbracket \subseteq
+    \llbracket T_2\rrbracket$ — no axioms, no approximations.
+
+  \item \textbf{\color{darkslateblue}Designed for dynamic idioms.}
+    Overloading, pattern matching, and non-uniform branching are all
+    described \emph{naturally}, without awkward workarounds.
+
+  \item \textbf{\color{darkslateblue}Gradual typing.}
+    Works incrementally.  No flag day, no forced full rewrite.  Start
+    with nothing and add types where they help.
+
+  \item \textbf{\color{darkslateblue}Proven in production.}
+    Already integrated in Elixir, Python, Ballerina, Erlang.  Finding
+    real bugs in real codebases \emph{today}.
+
+  \item \textbf{\color{darkslateblue}Solid theoretical foundations.}
+    Backed by 15+ years of peer-reviewed work (JACM, POPL, ICFP,
+    OOPSLA).  
+
+  \item \textbf{\color{darkslateblue}Supports formal certification.}
+    Soundness is proved, not just tested — directly relevant to
+    regulatory requirements for certified software.
+
+\end{enumerate}
+
+\end{frame}
+
+
+%% ----------------------------------------------------------
+%%  SLIDE 11 — Takeaways
+%% ----------------------------------------------------------
+\begin{frame}
+\frametitle{Takeaways} \vspace*{-6mm}
+
+\begin{enumerate}[<+->]\setlength{\itemsep}{6pt}
+
+  \item Dynamic languages need static typing — for correctness, tooling,
+        and regulatory confidence.
+
+  \item Traditional type systems were not built for dynamic idioms.
+        A new model is needed.
+
+  \item Set-theoretic types with semantic subtyping provide that model:
+        \emph{expressive, correct, and well-founded}.
+
+  \item Gradual adoption means no disruption — start typing today,
+        incrementally.
+
+  \item Already validated across 8+ languages and real-world production
+        codebases.
+
+  \item \textbf{\color{darkslateblue}The theory is solid —and still advancing. The practice is proven. The adoption is growing}
+
+\end{enumerate}
+
+\end{frame}

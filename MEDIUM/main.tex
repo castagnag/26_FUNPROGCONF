@@ -1,0 +1,77 @@
+\documentclass[aspectratio=169,compress]{beamer}
+\usetheme[university=bs,faculty=standard]{fibeamer}
+\usepackage[utf8]{inputenc}
+\usepackage[
+  main=english
+]{babel}        %% typeset as follows:
+%%
+%%   \begin{otherlanguage}{italian}   ... \end{otherlanguage}
+%%
+%% These macros specify information about the presentation
+\title{All Set: Bringing Static Types to Elixir}
+\subtitle{\mbox{ }\vspace{6mm}
+} %% title page.
+\author{Giuseppe CASTAGNA {\small(CNRS, Université Paris Cité)}
+\hfill\parbox[t]{.2\textwidth}{
+\footnotesize\it
+Elisir di sì perfetta,\\[-1.5mm]
+di sì rara qualità,\\[-1.5mm]
+ne sapessi la ricetta,\\[-1.5mm]
+conoscessi chi ti fa!
+}\\[-6.5mm]
+Guillaume DUBOC {\small(University of Bristol)}}
+%% These additional packages are used within the document:
+\usepackage[overlay,absolute,
+%showboxes
+]{textpos}
+\usepackage{ragged2e}  % `\justifying` text
+\usepackage{booktabs}  % Tables
+\usepackage{tabularx}
+\usepackage{tikz}      % Diagrams
+\usetikzlibrary{calc, shapes, backgrounds}
+\usepackage{amsmath, amssymb}
+\usepackage{url}       % `\url`s
+\usepackage{listings}  % Code listings
+\usepackage{setup}
+\usepackage{ulem}
+\usepackage[cal=boondox,  % heavily sloped
+            scr=esstix]   % slightly sloped
+           {mathalpha}
+\newtagform{purple}{\color{purple}(}{)}
+%\frenchspacing
+
+\newcommand{\struct}[1]{\textcolor{lightblue}{#1}}
+% Beamer customization%%
+\setbeamerfont{frametitle}{shape=\bf,size=\LARGE}
+\addtobeamertemplate{frametitle}{\vspace*{-.4cm}}{\vspace*{0.2cm}}
+
+\newenvironment<>{myblock}[1]{%
+  \setbeamercolor{block title}{fg=cadmiumgreen,bg=white}%
+  \setbeamercolor{block body}{fg=black,bg=white}%
+  \setbeamerfont{block title}{size=\large,shape=\bf}
+  \begin{block}#2{{#1}\vspace{-1.5mm}}}{\end{block}}
+
+%%%% UNCOMMENT THE FOLLOWING LINE TO REMOVE SLIDE NUMBERS
+%\setbeamertemplate{footline}{}
+
+\begin{document}
+  \frame[c]{\maketitle
+    \begin{textblock}{3.6}(11.9,0.75)
+      \includegraphics[width=\textwidth]{images/logo-bristol.pdf}
+    \end{textblock}
+    \begin{textblock}{14}(1.1,14.9)
+      \footnotesize\textcolor{white}{$\lambda$ Func Prog Conf, 14 Oct 2026, Stockholm}
+    \end{textblock}}
+
+\section{Set-Theoretic Types and Dynamic Languages}
+\input{set-theoretic}
+
+\input{core}
+
+\section{Gradual Typing}
+\input{gradual}
+
+\section{Integration in Elixir}
+\input{implementation}
+
+\end{document}
