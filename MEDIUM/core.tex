@@ -46,7 +46,7 @@
 def negate(x) when is_integer(x), do: not x
 \end{minted}
 \end{block}\pause
-\begin{block}{Type warning}
+\begin{block}{Type error}
 \begin{warnverbatim}
 \warn incompatible types given to Kernel.not/1:
     not x
@@ -162,7 +162,7 @@ end
 \end{block}
 \pause
 \begin{onlyenv}<4>
-\begin{block}{Type warning in subtract}
+\begin{block}{Type error in subtract}
 \begin{warnverbatim}
 \warn incompatible types given to Kernel.+/2:
     a + negate(b)
@@ -305,7 +305,7 @@ def logical_or(x, _), do: x
 \defverbatim[colored]{\result}{
 %\vspace{-1.5mm}
 \begin{minted}[escapeinside=||,fontsize=\small]{elixir}
-|\spec| |\ty| result() = 
+|\spec| |\ty| response() = 
     %{output: :ok, socket: socket()} or
     %{output: :error, message: :timeout or {:delay, integer()}}
 \end{minted}
@@ -354,7 +354,7 @@ describes ``maps of size 2''.
   \node[font=\small] at (5.25,2.9) {\texttt{list()}};
   \draw[dashed, thick] (1.75,1.2) ellipse (1.1 and 0.7);
   \node[font=\scriptsize] at (1.75,1.2) {size 2};
-  \draw[dashed, thick] (3.65,0.15) rectangle (6.85,2.4);
+  \draw[dashed, thick] (3.65,0.15) rectangle (6.85,3.25);
 \end{tikzpicture}
 
 {\scriptsize dashed: the values that pass the guard}
@@ -372,14 +372,14 @@ Two types approximate them:
 \end{frame}
 
 \begin{frame}[fragile,t]
-\frametitle{Dead clauses and exhaustiveness}\transdissolve<2,5-6>
+\frametitle{Dead clauses and exhaustiveness}\transdissolve<2,6-7>
 Same recipe as for patterns (slide~\matchframenumber): clause $i$ receives the input values
 \textbf{minus} those \surely{surely accepted} by the previous clauses,
 \textbf{and} \possibly{possibly accepted} by its own guard.
 \only<1>{\begin{textblock}{11}(2.5,5.9)
 \fcolorbox{gray!60}{white}{\includegraphics[width=10.8cm,trim=26 18 30 102,clip]{images/recall-match.pdf}}% slide 8, last overlay (pdfseparate of main.pdf)
 \end{textblock}}%
-\only<2>{\begin{textblock}{11}(2.5,5.9)
+\only<2-3>{\begin{textblock}{11}(2.5,5.9)
 \fcolorbox{gray!60}{white}{\scalebox{0.773}{\begin{minipage}[t][135pt]{397.5pt}% same size as the screenshot above
 \vspace*{5.45pt}\hspace*{1.5mm}% aligned with the screenshot
 - To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \PA{p_1}$};\\
@@ -395,7 +395,10 @@ Same recipe as for patterns (slide~\matchframenumber): clause $i$ receives the i
 \end{mathpar}
 \end{minipage}}}%
 \end{textblock}}%
-\pause\pause
+\only<3>{\begin{textblock}{16}(0,0)% handwritten arrows only (extracted from an annotated screenshot of overlay 2)
+\includegraphics[width=\paperwidth]{images/hw-guard.png}
+\end{textblock}}%
+\pause\pause\pause
 \begin{block}{Nothing left: a dead clause (Elixir 1.20)}
 \begin{minted}[fontsize=\footnotesize]{elixir}
 def red(x) when is_integer(x) or is_boolean(x), do: 1
@@ -414,7 +417,7 @@ previous clauses have already matched on the following types:
 \pause
 \vspace{-2mm}
 \begin{block}{Exhaustiveness depends on the declared input type}
-\begin{onlyenv}<4>
+\begin{onlyenv}<5>
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| list() -> _               # _ : result type left to inference
 def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
@@ -422,7 +425,7 @@ def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \vspace{-1mm}
 {\small Covered by the \surely{surely accepted} type \code{list()}: exhaustive\par}
 \end{onlyenv}
-\begin{onlyenv}<5>
+\begin{onlyenv}<6>
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| map() or list() -> _      # _ : result type left to inference
 def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
@@ -430,7 +433,7 @@ def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \vspace{-1mm}
 {\small Covered only by the \possibly{possibly accepted} type: \emph{may} not be exhaustive\par}
 \end{onlyenv}
-\begin{onlyenv}<6>
+\begin{onlyenv}<7>
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| term() -> _               # _ : result type left to inference
 def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
@@ -453,7 +456,7 @@ def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \vspace{-4mm}
 \begin{block}{\vspace{-5mm}}
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
-|\spec| result() -> _
+|\spec| response() -> _
 def handle(r) when r.output == :ok, do: {:accepted, r.socket}
 def handle(r) when is_atom(r.message), do: r.message
 def handle(r), do: {:retry, elem(r.message, 1)}
@@ -479,12 +482,12 @@ clause & type of \texttt{r} & result\\\hline
 \end{minted}
 \vspace{-1mm}
 \end{block}
-{\small\color{gray}We declared only the input type, \texttt{result()}: the rest is inferred.\par}
+{\small\color{gray}We declared only the input type, \texttt{response()}: the rest is inferred.\par}
 \end{onlyenv}
 \begin{onlyenv}<6>
 \begin{block}{A bug caught by narrowing (Elixir 1.20)}
 \begin{minted}[fontsize=\footnotesize]{elixir}
-case fetch() do      # fetch() returns a result()
+case fetch() do      # fetch() returns a response()
   r when r.output == :ok -> r.socket
   r -> r.socket
 end
@@ -517,6 +520,7 @@ The guard is split into its \texttt{or} branches; the body is typed once per bra
 \uncover<3->{\textcolor{bordeaux}{\code{is_integer(y)}}} & \uncover<3->{\textcolor{bordeaux}{\texttt{(term(), integer() -> \{integer(), term()\})}}}
 \end{tabular}\par}
 \pause\pause
+\begin{onlyenv}<-4>
 \begin{block}{Inferred type: the intersection of the two arrows}
 \begin{coloredverbatim}
 $ (boolean(), term() -> \{term(), boolean()\}) \oand
@@ -526,6 +530,16 @@ $ (boolean(), term() -> \{term(), boolean()\}) \oand
 \end{block}
 {\small\color{gray}Branches are analyzed in evaluation order: swapping the operands of
 \texttt{or} can change the arrows.\par}
+\end{onlyenv}
+\begin{onlyenv}<5>
+\begin{exampleblock}{What it allows to type}
+\begin{minted}[fontsize=\footnotesize]{elixir}
+{n, b} = baz(true, 2)   # both arrows apply: {integer(), boolean()}
+{n + 1, not b}          # accepted (with one arrow: n, b : term(), rejected)
+\end{minted}
+\vspace{-1mm}
+\end{exampleblock}
+\end{onlyenv}
 \end{frame}
 
 

@@ -111,55 +111,95 @@ and typed structs.\par}
 \end{frame}
 
 
+% Future work: one frame per topic, what fails today (Elixir 1.20.4, checked) and what the
+% planned types catch (proposed syntax, not final)
+% new syntax (not in Elixir today), in one very visible color
+\definecolor{newsyntax}{RGB}{230,60,0}
+\newcommand{\newkw}[1]{\textcolor{newsyntax}{\textbf{#1}}}
+
 \begin{frame}[fragile]
-\frametitle{Future work}\vspace{-2mm}
-
-\textbf{\color{darkslateblue}Types for the Elixir Module System:}\\
-Currently, only the type \code{module()} is supported, while we want a finer-grained typing of functions manipulating modules. We are developing solutions applicable to other languages.
-% \vspace{-5mm}
-% \begin{block}{\vspace{-25mm}}
-% \begin{minted}{elixir}
-% !\spec! (X: Stack[el=bool], sx: X.stack, Y: Stack[el=bool], sy: Y.stack) -> Y.stack
-% def move(X, sx, Y, sy), do: Y.push(sy, X.top(sx))   
-%\end{minted}
-%\end{block}
-
-\bigskip
-\textbf{\color{darkslateblue}Record types comprehensions:}\\
-We want to type standard library functions that manipulate records with \emph{first-class} keys, such as \code{Map.intersect/2} and \code{Map.reject/2}.
-% \definecolor{typeconstructorgreen}{rgb}{0.0, 0.5, 0.25}  % Nice green for type constructors
-% \definecolor{keyvarblue}{rgb}{0.1, 0.3, 0.7}              % Nice blue for key variables
-% \newcommand{\keyof}[1]{\textcolor{typeconstructorgreen}{\mathsf{keyof}}(#1)}
-% \newcommand{\tvar}{\textcolor{keyvarblue}{\boldsymbol{\theta}}}
-% \begin{tabular}{@{}l@{\;\;}l@{\;\;}l@{}}
-%  \texttt{intersect/2}
-%   & $(\alpha,\, \beta) \to \%\{\,\tvar \in \keyof{\alpha} \land \keyof{\beta} \mid \beta[\tvar]\,\}\quad\texttt{when } \alpha,\beta\texttt{:map()}$  \\[6pt]
-% \texttt{reject/2}
-%   & $(\alpha, ((\keyof{\alpha} \to \texttt{term}) \,\wedge\, ( \keyof{\alpha}\wedge\beta)\to\neg\texttt{truthy})) \to $\\
-%   &\qquad\qquad\qquad\qquad
-%      $\%\{\, \tvar\in \keyof{\alpha}\setminus\beta \mid \alpha[\tvar]\,\} \quad\texttt{when } \alpha\texttt{:map()}$\\[3pt]
-% \end{tabular}
-
-\bigskip
-\textbf{\color{darkslateblue}Types for processes and message passing:}
-Currently, only the type \code{pid()} is supported.
-
-In collaboration with \emph{Università degli Studi di Bologna} (Italy) and \emph{Université d'Evry} (France), we are working on typing processes with the set of messages they can receive and, later, we plan to introduce Mailbox types, to ensure liveness properties.
-
-\end{frame}
-\begin{frame}
-\frametitle{Future work}\vspace*{-5mm}
-
-\textbf{\color{darkslateblue}Tooling:} We are developing migration tools, IDEs, error messages, .... In particular, in collaboration with \emph{Ca' Foscari} (Venice), we are  feeding LLMs with automatic translations of TypeSpecs into Elixir Types together with the type errors they produce to improve the quality of LLM-generated type annotations and error messages.
-
-\bigskip\medskip
-
-\textbf{\color{darkred}Application to Ruby:} We are collaborating with \textbf{NII} and members of the Ruby team to apply our gradual typing solutions to Ruby, which has a syntax similar to Elixir but is object-oriented and has a more complex type system (with classes, modules, \ldots).
-
-
+\frametitle{Future work: typing modules}\vspace{-3mm}
+\begin{block}{Today (Elixir 1.20): the type \code{module()} says nothing}
+\begin{minted}[fontsize=\footnotesize]{elixir}
+defmodule Counter do
+  @behaviour GenServer
+  def init(:ok), do: {:ok, %{}}
+  def handle_call({:bump, k}, _from, s), do: ...
+end
+GenServer.start_link(Counter, :not_ok)    # no warning: crashes at run time
+\end{minted}
+\vspace{-1mm}
+\end{block}
+\pause
+\vspace{-2mm}
+\begin{exampleblock}{Tomorrow: typed behaviours}
+\begin{minted}[fontsize=\footnotesize,escapeinside=||]{elixir}
+defmodule Counter do
+  |\newkw{\$behaviour}| GenServer|\newkw{[}|init_arg: :ok, call_msg: {:bump, atom()}, reply: integer()|\newkw{]}|
+  |\newkw{\$opaque}| state = %{atom() => integer()}
+  def init(:ok), do: {:ok, %{}}
+  def handle_call({:bump, k}, _from, s), do: ...
+end
+GenServer.start_link(Counter, :not_ok)    # error: the init_arg of Counter is :ok
+\end{minted}
+\vspace{-1mm}
+\end{exampleblock}
+{\small\color{gray}Joint work with A.~Boussaa, A.~Bretagne and J.~Valim; proposed syntax, not final.\par}
 \end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Future work: typing processes}\vspace{-3mm}
+\begin{block}{Today (Elixir 1.20): the type \code{pid()} says nothing}
+\begin{minted}[fontsize=\footnotesize]{elixir}
+send(self(), true)
+receive do y -> IO.puts(y + y) end        # no warning: crashes at run time
+\end{minted}
+\vspace{-1mm}
+\end{block}
+\pause
+\vspace{-2mm}
+\begin{exampleblock}{Tomorrow: \code{pid(t)}, where \code{t} is the type of the messages the process accepts}
+\begin{minted}[fontsize=\footnotesize,escapeinside=||]{elixir}
+|\newkw{\$interface}| {:add, integer()} or boolean()
+spawn(fn ->
+  send(self(), true)                      # accepted: boolean() is in the interface
+  receive do
+    {:add, y} -> y + 1                    # y : integer()
+    y -> y + y                            # error: y : boolean()
+  end
+end)
+\end{minted}
+\vspace{-1mm}
+\end{exampleblock}
+{\small\color{gray}Joint work with L.~Padovani (Bologna) and D.~Varacca (\'Evry); later, mailbox types to ensure liveness.\par}
+\end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Future work: record type comprehensions}\vspace{-3mm}
+\begin{block}{Today (Elixir 1.20): the result of \texttt{Map.intersect/2} is \texttt{dynamic()}}
+\begin{minted}[fontsize=\footnotesize]{elixir}
+m = Map.intersect(%{a: 1, b: "x"}, %{b: :ok, c: 2})
+m.a                                       # no warning: crashes at run time
+m.b + 1                                   # no warning: crashes at run time
+\end{minted}
+\vspace{-1mm}
+\end{block}
+\pause
+\vspace{-2mm}
+\begin{exampleblock}{Tomorrow: record types defined by comprehension over the keys}
+{\small Type of \texttt{Map.intersect/2}: the keys \texttt{k} common to both maps, with their type in the second\par}
+\begin{minted}[fontsize=\footnotesize,escapeinside=!!]{elixir}
+!\spec! (a, b) -> %{k in keyof(a) and keyof(b) | b[k]} when a: map(), b: map()
+m = Map.intersect(%{a: 1, b: "x"}, %{b: :ok, c: 2})   # m : %{b: :ok}
+m.a                                       # error: unknown key .a
+m.b + 1                                   # error: :ok is not a number
+\end{minted}
+\vspace{-1mm}
+\end{exampleblock}
+{\small\color{gray}The same comprehensions type \texttt{Map.take}, \texttt{drop}, \texttt{merge}, \texttt{filter}, \ldots; syntax not final.\par}
+\end{frame}
+
+\end{document}
 
 %% ----------------------------------------------------------
 %%  SLIDE 10 — Why this is the most promising approach
