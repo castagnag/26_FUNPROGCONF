@@ -302,36 +302,6 @@ def logical_or(x, _), do: x
 
 
 
-\section{Guard analysis}
-\begin{frame}
-\frametitle{Outline} 
-\tableofcontents[currentsection]
-\end{frame}
-
-
-\subsection{Case expressions: redundancy, exhaustiveness, and narrowing}
-
-\begin{frame}[fragile]
-\frametitle{Pattern Matching: Case expressions}
-\begin{block}{Using a case expression}
-\begin{minted}[escapeinside=!!]{elixir}
-def negate(x), do: (case x do
-  x when is_integer(x) -> -x
-  x when is_boolean(x) -> not x
-end)
-\end{minted}
-\end{block}
-
-\begin{block}{Using multiple function clauses}
-\begin{minted}[escapeinside=!!]{elixir}
-def negate(x) when is_integer(x), do: -x
-def negate(x) when is_boolean(x), do: not x
-\end{minted}
-\end{block}
-
-\textbf{\color{darkslateblue}Both are equivalent, but the second is preferred in Elixir.}
-\end{frame}
-
 \defverbatim[colored]{\result}{
 %\vspace{-1.5mm}
 \begin{minted}[escapeinside=||,fontsize=\small]{elixir}
@@ -342,92 +312,198 @@ def negate(x) when is_boolean(x), do: not x
 \vspace{-1.5mm}
 }
 
-\begin{frame}[fragile]
-\frametitle{Exhaustiveness and redundancy checking}
-\vspace{-7mm}
-\begin{block}{\vspace{-5mm}}
-\result
+\section{Guard analysis}
+\begin{frame}
+\frametitle{Outline} 
+\tableofcontents[currentsection]
+\end{frame}
+
+% colors for the two approximations of a guard
+\newcommand{\surely}[1]{\textcolor{typeGreen}{#1}}
+\newcommand{\possibly}[1]{\textcolor{typeOrange}{#1}}
+
+\subsection{Exhaustiveness and dead clauses}
+
+\begin{frame}[fragile,t]
+\frametitle{Guards are more than type tests}
+A multi-clause function is a \code{case} on its arguments: each clause has a pattern and a
+\emph{guard}.
+\begin{block}{Guards combine type tests, comparisons, field access, \texttt{and}, \texttt{or}, \texttt{not}}
+\begin{minted}{elixir}
+def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
+\end{minted}
 \end{block}
 \pause
-
-\begin{block}{Exhaustiveness checking: handling all cases}
-\begin{minted}[escapeinside=||,fontsize=\small]{elixir}
-|\spec| result() -> string()
-def handle(r) when r.output == :ok, do: "Msg received"
-def handle(r) when r.message == :timeout, do: "Timeout"
-\end{minted}
+\textbf{\color{darkslateblue}The values that pass this guard do not form a type:} no type
+describes ``maps of size 2''.
 \pause
-\vspace{-1.8mm}
-\begin{minted}[fontsize=\small]{elixir}
-#=> Type Warning: non-exhaustive pattern matching
+\begin{columns}[c,onlytextwidth]
+\begin{column}{0.47\textwidth}
+\centering
+\begin{tikzpicture}[scale=0.62]
+  \begin{scope}
+    \clip[rounded corners=6pt] (0,0) rectangle (7,3.4);
+    \fill[typeGreen!25] (3.5,0) rectangle (7,3.4);
+  \end{scope}
+  \draw[typeOrange, very thick, rounded corners=6pt] (0,0) rectangle (7,3.4);
+  \draw[gray] (3.5,0) -- (3.5,3.4);
+  \node[font=\small] at (1.75,2.9) {\texttt{map()}};
+  \node[font=\small] at (5.25,2.9) {\texttt{list()}};
+  \draw[dashed, thick] (1.75,1.2) ellipse (1.1 and 0.7);
+  \node[font=\scriptsize] at (1.75,1.2) {size 2};
+  \draw[dashed, thick] (3.65,0.15) rectangle (6.85,2.4);
+\end{tikzpicture}
+
+{\scriptsize dashed: the values that pass the guard}
+\end{column}
+\begin{column}{0.5\textwidth}
+Two types approximate them:
+\begin{itemize}
+\item \surely{\textbf{surely accepted}}: \code{list()}\\
+      {\small every list passes}
+\item \possibly{\textbf{possibly accepted}}: \code{map() or list()}\\
+      {\small only maps and lists can pass}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile,t]
+\frametitle{Dead clauses and exhaustiveness}\transdissolve<4-5>
+Same recipe as for patterns (slide~\matchframenumber): clause $i$ receives the input values
+\textbf{minus} those \surely{surely accepted} by the previous clauses,
+\textbf{and} \possibly{possibly accepted} by its own guard.
+\pause
+\begin{block}{Nothing left: a dead clause (Elixir 1.20)}
+\begin{minted}[fontsize=\footnotesize]{elixir}
+def red(x) when is_integer(x) or is_boolean(x), do: 1
+def red(x) when is_integer(x), do: 2
 \end{minted}
+\vspace{-1mm}
+\begin{warnverbatim}
+\warn the following clause is redundant:
+    def red(x) when is_integer(x)
+it has type: integer()
+previous clauses have already matched on the following types:
+    boolean() or integer()
+\end{warnverbatim}
+\vspace{-1mm}
 \end{block}
 \pause
-
-\defverbatim[colored]{\unusedBranch}{
-\begin{minted}[fontsize=\small]{elixir}
-#=> Type Warning: unused branch
+\vspace{-2mm}
+\begin{block}{Exhaustiveness depends on the declared input type}
+\begin{onlyenv}<3>
+\begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
+|\spec| list() -> _               # _ : result type left to inference
+def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \end{minted}
-}
-
-\begin{block}{Redundancy checking: detecting unused clauses}
-\begin{minted}[escapeinside=||,fontsize=\small]{elixir}
-|\spec| result() -> string()
-def handle(r) when r.output == :ok, do: "Msg received"
-def handle(r) when r.output == :error, do: "Error raised"
-def handle(%{socket: _}), do: "Socket found"
+\vspace{-1mm}
+{\small Covered by the \surely{surely accepted} type \code{list()}: exhaustive\par}
+\end{onlyenv}
+\begin{onlyenv}<4>
+\begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
+|\spec| map() or list() -> _      # _ : result type left to inference
+def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \end{minted}
-\pause%
-\vspace{-1.6mm}\unusedBranch\vspace{-1.7mm}
+\vspace{-1mm}
+{\small Covered only by the \possibly{possibly accepted} type: \emph{may} not be exhaustive\par}
+\end{onlyenv}
+\begin{onlyenv}<5>
+\begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
+|\spec| term() -> _               # _ : result type left to inference
+def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
+\end{minted}
+\vspace{-1mm}
+{\small Not covered: not exhaustive\par}
+\end{onlyenv}
 \end{block}
 \end{frame}
 
-% add a fourth branch for overlapping, by matching 
-% on :socket
+\subsection{Narrowing and inference}
 
-% remove? no time
-\begin{frame}[fragile]
-\transdissolve
-\frametitle{Narrowing: inferring more precise types}
-
-\vspace{-11mm}%was \vspace{-4mm}
+\begin{frame}[fragile,t]\transdissolve<5-6>
+\frametitle{Narrowing: each clause sees a more precise type}
+\vspace{-2mm}
 \begin{block}{\vspace{-5mm}}
 \result
-\end{block}\pause
-\begin{block}{Automatically infer a return type}
+\end{block}
+\begin{onlyenv}<-5>
+\vspace{-4mm}
+\begin{block}{\vspace{-5mm}}
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| result() -> _
 def handle(r) when r.output == :ok, do: {:accepted, r.socket}
 def handle(r) when is_atom(r.message), do: r.message
 def handle(r), do: {:retry, elem(r.message, 1)}
 \end{minted}
-\pause\vspace{-1.7mm}
-\begin{minted}[fontsize=\footnotesize]{elixir}
-#=> Return type: {:accept, socket()} or :timeout or {:retry, integer()}
-\end{minted}
-\vspace{-1.2mm}
+\vspace{-1mm}
 \end{block}
-\pause\pause\pause\pause
-\begin{block}{Inferring a more precise type}
+\end{onlyenv}
+\begin{onlyenv}<-4>
+{\footnotesize\frenchspacing
+\begin{tabular}{@{}c@{\quad}l@{\quad}l@{}}
+clause & type of \texttt{r} & result\\\hline
+\uncover<2->{1 & \texttt{\%\{output: :ok, socket: socket()\}} & \texttt{\{:accepted, socket()\}}}\\
+\uncover<3->{2 & \texttt{\%\{output: :error, message: :timeout\}} & \texttt{:timeout}}\\
+\uncover<4->{3 & \texttt{\%\{output: :error, message: \{:delay, integer()\}\}} & \texttt{\{:retry, integer()\}}}
+\end{tabular}\par}
+\end{onlyenv}
+\begin{onlyenv}<5>
+\begin{block}{Each row is an arrow: the inferred type of \code{handle}}
 \begin{minted}[fontsize=\footnotesize,escapeinside=||]{elixir}
-|\spec| (%{output: :ok, socket: socket()} -> {:accept,socket()}) and
+|\spec| (%{output: :ok, socket: socket()} -> {:accepted, socket()}) and
   (%{output: :error, message: :timeout} -> :timeout) and
-  (%{output: :error, message: {:delay,integer()}} -> {:retry,integer()})
+  (%{output: :error, message: {:delay, integer()}} -> {:retry, integer()})
+\end{minted}
+\vspace{-1mm}
+\end{block}
+{\small\color{gray}We declared only the input type, \texttt{result()}: the rest is inferred.\par}
+\end{onlyenv}
+\begin{onlyenv}<6>
+\begin{block}{A bug caught by narrowing (Elixir 1.20)}
+\begin{minted}[fontsize=\footnotesize]{elixir}
+case fetch() do      # fetch() returns a result()
+  r when r.output == :ok -> r.socket
+  r -> r.socket
+end
+\end{minted}
+\vspace{-1mm}
+\begin{warnverbatim}
+\warn unknown key .socket in expression: r.socket
+the given type does not have the given key:
+    %\{message: :timeout or \{:delay, integer()\}, output: :error\}
+\end{warnverbatim}
+\vspace{-1mm}
+\end{block}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile,t]
+\frametitle{Splitting guards: several arrows for one clause}
+\begin{block}{One clause, a disjunctive guard}
+\begin{minted}{elixir}
+def baz(x, y) when is_boolean(x) or is_integer(y), do: {y, x}
 \end{minted}
 \end{block}
-\only<4>{\begin{textblock}{5}(0,0)
-\includegraphics[scale=1]{images/slide-narrow1.pdf}
-\end{textblock}}
+\pause
+The guard is split into its \texttt{or} branches; the body is typed once per branch:
 
-\only<5>{\begin{textblock}{5}(0,0)
-\includegraphics[scale=1]{images/slide-narrow2.pdf}
-\end{textblock}}
-\only<6>{\begin{textblock}{5}(0,0)
-\includegraphics[scale=1]{images/slide-narrow3.pdf}
-\end{textblock}}
-
-\only<8>{\begin{textblock}{5}(0,0)
-\includegraphics[scale=1]{images/slideNarrowing.pdf}
-\end{textblock}}
+\medskip
+{\small
+\begin{tabular}{@{}l@{\quad}l@{}}
+\textcolor{typeBlue}{\code{is_boolean(x)}} & \textcolor{typeBlue}{\texttt{(boolean(), term()) -> \{term(), boolean()\}}}\\[1mm]
+\uncover<3->{\textcolor{bordeaux}{\code{is_integer(y)}}} & \uncover<3->{\textcolor{bordeaux}{\texttt{(term(), integer()) -> \{integer(), term()\}}}}
+\end{tabular}\par}
+\pause\pause
+\begin{block}{Inferred type: the intersection of the two arrows}
+\begin{coloredverbatim}
+$ ((boolean(), term()) -> \{term(), boolean()\}) \oand
+  ((term(), integer()) -> \{integer(), term()\})
+\end{coloredverbatim}
+\vspace{-1mm}
+\end{block}
+{\small\color{gray}Branches are analyzed in evaluation order: swapping the operands of
+\texttt{or} can change the arrows.\par}
 \end{frame}
+
 

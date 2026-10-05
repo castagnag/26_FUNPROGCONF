@@ -5,27 +5,38 @@
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Elixir 1.20: typing without annotations}\vspace{-3mm}
-\begin{itemize}\setlength{\itemsep}{2pt}
+\frametitle{Elixir 1.20: typing without annotations}\vspace{-4mm}
+\begin{itemize}\setlength{\itemsep}{0pt}
 \item No annotation, no syntactic change: every parameter is typed \code{dynamic()}
 \item Types are refined by patterns and guards (guard analysis, Section~3)
 \item Inferred types are checked by gradual typing (Section~4)
-\item Multi-clause functions get intersection types, from a fine-grained analysis of
-      their guards:
+\item Multi-clause functions get intersection types from their guards (Section~3),
+      with \code{dynamic()} propagated to the results (Section~4); for \code{negate}:
 \end{itemize}
 \vspace{-1mm}
 \begin{block}{\vspace{-5mm}}
+\begin{coloredverbatim}
+(integer() -> integer() \oand dynamic()) \oand
+(boolean() -> boolean() \oand dynamic())
+\end{coloredverbatim}
+\vspace{-1mm}
+\end{block}
+\vspace{-2.5mm}
+\begin{block}{The error is still caught}
 \begin{minted}[fontsize=\footnotesize]{elixir}
 def bad(b) when is_boolean(b), do: 1 + negate(b)
-# warning: incompatible types given to Kernel.+/2
-#   given types: integer(), dynamic(boolean())
 \end{minted}
+\vspace{-1mm}
+\begin{warnverbatim}
+\warn incompatible types given to Kernel.+/2: 1 + negate(b)
+given types: integer(), dynamic(boolean())   \textcolor{gray}{(i.e., boolean() and dynamic())}
+\end{warnverbatim}
 \vspace{-1mm}
 \end{block}
 \pause
-\textbf{\color{darkslateblue}Type signatures} (the \texttt{\$} of this talk) are planned, after
+{\small\textbf{\color{darkslateblue}Type signatures} (the \texttt{\$} of this talk) are planned, after
 efficient recursive and parametric types (the polymorphism of Section~2), map traversal,
-and typed structs.
+and typed structs.\par}
 \end{frame}
 
 \begin{frame}
