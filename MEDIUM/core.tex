@@ -321,6 +321,9 @@ def logical_or(x, _), do: x
 % colors for the two approximations of a guard
 \newcommand{\surely}[1]{\textcolor{typeGreen}{#1}}
 \newcommand{\possibly}[1]{\textcolor{typeOrange}{#1}}
+% surely (floor) / possibly (ceiling) accepted types of a pattern with its guard
+\newcommand{\SA}[1]{{\color{typeGreen}\pmb{\lfloor} #1 \pmb{\rfloor}}}
+\newcommand{\PA}[1]{{\color{typeOrange}\pmb{\lceil} #1 \pmb{\rceil}}}
 
 \subsection{Exhaustiveness and dead clauses}
 
@@ -369,11 +372,30 @@ Two types approximate them:
 \end{frame}
 
 \begin{frame}[fragile,t]
-\frametitle{Dead clauses and exhaustiveness}\transdissolve<4-5>
+\frametitle{Dead clauses and exhaustiveness}\transdissolve<2,5-6>
 Same recipe as for patterns (slide~\matchframenumber): clause $i$ receives the input values
 \textbf{minus} those \surely{surely accepted} by the previous clauses,
 \textbf{and} \possibly{possibly accepted} by its own guard.
-\pause
+\only<1>{\begin{textblock}{11}(2.5,5.9)
+\fcolorbox{gray!60}{white}{\includegraphics[width=10.8cm,trim=26 18 30 102,clip]{images/recall-match.pdf}}% slide 8, last overlay (pdfseparate of main.pdf)
+\end{textblock}}%
+\only<2>{\begin{textblock}{11}(2.5,5.9)
+\fcolorbox{gray!60}{white}{\scalebox{0.773}{\begin{minipage}[t][135pt]{397.5pt}% same size as the screenshot above
+\vspace*{5.45pt}\hspace*{1.5mm}% aligned with the screenshot
+- To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \PA{p_1}$};\\
+\hspace*{1.5mm}- To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\setminus \SA{p_1})\And \PA{p_2}$};\\
+\hspace*{1.5mm}- The type of the match expression is {\color{blue}$\T_1\Or \T_2$}.\\
+\hspace*{1.5mm}- Pattern matching is exhaustive if $\color{blue}\T\leq\PA{p_1}\Or \PA{p_2}$.\\
+\hspace*{1.5mm}\textbf{Formally:}\hfill{\small $\color{typeGreen}\pmb{\lfloor} p\pmb{\rfloor}$: \surely{surely accepted}, $\color{typeOrange}\pmb{\lceil} p\pmb{\rceil}$: \possibly{possibly accepted} by $p$ and its guard}
+\vspace{-2mm}
+\begin{mathpar}\Bl
+\infer[{[Match]}]
+{\Gamma\vdash e:\T\and\Gamma, \T\!\!\And\!\!\PA{p_1\!}/p_1\vdash e_1:\T_1\and \Gamma, \T\setminus\SA{p_1\!}/p_2\vdash e_2:\T_2}
+{\Gamma\vdash \texttt{match } e \texttt{ with }p_1 \texttt{->} e_1 \texttt{ | }p_2 \texttt{->} e_2 : \T_1\Or\T_2 }\mbox{\small($\T\leq\PA{p_1\!}\Or\PA{\!p_2\!}$)}
+\end{mathpar}
+\end{minipage}}}%
+\end{textblock}}%
+\pause\pause
 \begin{block}{Nothing left: a dead clause (Elixir 1.20)}
 \begin{minted}[fontsize=\footnotesize]{elixir}
 def red(x) when is_integer(x) or is_boolean(x), do: 1
@@ -392,7 +414,7 @@ previous clauses have already matched on the following types:
 \pause
 \vspace{-2mm}
 \begin{block}{Exhaustiveness depends on the declared input type}
-\begin{onlyenv}<3>
+\begin{onlyenv}<4>
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| list() -> _               # _ : result type left to inference
 def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
@@ -400,7 +422,7 @@ def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \vspace{-1mm}
 {\small Covered by the \surely{surely accepted} type \code{list()}: exhaustive\par}
 \end{onlyenv}
-\begin{onlyenv}<4>
+\begin{onlyenv}<5>
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| map() or list() -> _      # _ : result type left to inference
 def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
@@ -408,7 +430,7 @@ def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \vspace{-1mm}
 {\small Covered only by the \possibly{possibly accepted} type: \emph{may} not be exhaustive\par}
 \end{onlyenv}
-\begin{onlyenv}<5>
+\begin{onlyenv}<6>
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| term() -> _               # _ : result type left to inference
 def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
@@ -491,14 +513,14 @@ The guard is split into its \texttt{or} branches; the body is typed once per bra
 \medskip
 {\small
 \begin{tabular}{@{}l@{\quad}l@{}}
-\textcolor{typeBlue}{\code{is_boolean(x)}} & \textcolor{typeBlue}{\texttt{(boolean(), term()) -> \{term(), boolean()\}}}\\[1mm]
-\uncover<3->{\textcolor{bordeaux}{\code{is_integer(y)}}} & \uncover<3->{\textcolor{bordeaux}{\texttt{(term(), integer()) -> \{integer(), term()\}}}}
+\textcolor{typeBlue}{\code{is_boolean(x)}} & \textcolor{typeBlue}{\texttt{(boolean(), term() -> \{term(), boolean()\})}}\\[1mm]
+\uncover<3->{\textcolor{bordeaux}{\code{is_integer(y)}}} & \uncover<3->{\textcolor{bordeaux}{\texttt{(term(), integer() -> \{integer(), term()\})}}}
 \end{tabular}\par}
 \pause\pause
 \begin{block}{Inferred type: the intersection of the two arrows}
 \begin{coloredverbatim}
-$ ((boolean(), term()) -> \{term(), boolean()\}) \oand
-  ((term(), integer()) -> \{integer(), term()\})
+$ (boolean(), term() -> \{term(), boolean()\}) \oand
+  (term(), integer() -> \{integer(), term()\})
 \end{coloredverbatim}
 \vspace{-1mm}
 \end{block}

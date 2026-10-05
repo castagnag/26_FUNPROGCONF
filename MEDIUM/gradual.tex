@@ -5,9 +5,9 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Gradual Typing: No Big-Bang Migration}\transdissolve<2>
+\frametitle{Gradual typing: no big-bang migration}\transdissolve<2>
 \textbf{\color{darkslateblue}Two non-negotiable requirements for real-world adoption by existing languages:}\\
-\textbf{\hspace*{.4mm}1.} You do not have to type your entire codebase at once.\\
+\textbf{\hspace*{.4mm}1.} You do not have to type-annotate your entire codebase at once.\\
 \textbf{2.} Types do not modify the run-time semantics of existing programs.
 
 \medskip
@@ -32,8 +32,8 @@
 %%% def boolean_id(x), do: x
 \defverbatim[colored]{\weakApp}{
 \begin{minted}{elixir}
-id_weak(x_dyn)
-# type dynamic()
+id_weak(x_dyn)                    !\textcolor{gray}{\footnotesize x\textunderscore{}dyn may be a string, and}!
+# type dynamic()                  !\textcolor{gray}{\footnotesize id\textunderscore{}weak returns it unchanged}!
 \end{minted}
 }
 \defverbatim[colored]{\strongApp}{
@@ -50,7 +50,7 @@ id_weak(x_dyn)                    id_strong(x_dyn)
 }
 
 \begin{frame}
-\frametitle{Gradual Typing Conundrum}
+\frametitle{The gradual typing conundrum}
 \textbf{\color{darkslateblue}Typing every expression by \code{dynamic()} is trivially sound \ldots but hardly useful.}
 
 \bigskip
@@ -86,7 +86,7 @@ def id_weak(x), do: x !\label{c1}!
     \begin{overlayarea}{\textwidth}{1.3cm}
         \only<2-3>{\weakApp}
         \only<4-7>{\strongApp}
-        \only<8>{\strongAppPropagation}
+        \only<8->{\strongAppPropagation}
    \end{overlayarea}
 \end{block}
 \vspace{-1.5mm}
@@ -108,7 +108,7 @@ def id_strong(x) when is_integer(x), do: x
 % \frametitle{Strong function types (by the VM)}
 \begin{block}{Strong function type (by the VM)}
 \begin{minted}[linenos=false,escapeinside=!!]{elixir}
-!\spec! integer() -> integer()
+!\spec! number() -> number()
 def double(x), do: x + x
 \end{minted}
 \end{block}
@@ -118,11 +118,11 @@ def double(x), do: x + x
 % % \item Take into account user type checks
 % % \item Allows for propagation of \code{dynamic()} type in certain cases
 % \end{itemize}
-\only<5,6>{\begin{textblock}{15}(1.3,13.5)
-    \textbf{\color{darkslateblue}\large Strong function types guarantee correct output or runtime type-check failure}
+\only<5,6>{\begin{textblock}{15}(1.3,12.9)
+    \textbf{\color{darkslateblue}\large Strong function: on \emph{any} argument, even outside its domain, it returns a result in its codomain or fails}
 \end{textblock}}
 \only<9>{\begin{textblock}{5}(0,0)
-\includegraphics[scale=1]{images/slide-dynprop.pdf}
+\includegraphics[scale=1]{images/hw-dynprop.pdf}
 \end{textblock}}
 \end{frame}
 
@@ -131,46 +131,44 @@ def double(x), do: x + x
 
 \defverbatim[colored]{\dynType}{
 \begin{minted}{elixir}
-#=> Result type: (integer() or boolean()) !\color{magenta}and dynamic()!
+#=> negate(x_dyn): (integer() or boolean()) !\color{magenta}and dynamic()!
 \end{minted}
 }
 \defverbatim[colored]{\wrongType}{
 \begin{minted}{elixir}
-#=> Possible type: integer() or boolean()
+#=> negate(x_dyn): (integer() or boolean())
 \end{minted}
 }
 \defverbatim[colored]{\typeError}{
 \begin{minted}{elixir}
-#=> Type Error: + undefined for booleans
+#=> Without propagation: type error, + undefined for booleans
 \end{minted}
 }
 \defverbatim[colored]{\goodType}{
 \begin{minted}{elixir}
-#=> Result type: integer()
+#=> subtract: (dynamic(), dynamic() -> number())
 \end{minted}
 }
 \defverbatim[colored]{\betterType}{
 \begin{minted}{elixir}
-#=> Result type: integer() and dynamic()
+#=> subtract: (dynamic(), dynamic() -> number() !\color{magenta}and dynamic()!)
 \end{minted}
 }
 \defverbatim[colored]{\subtract}{
 \begin{minted}{elixir}
-def subtract(a, b) do
-    a + negate(b)
+def subtract(a, b), do: a + negate(b)
 \end{minted}
 }
 \defverbatim[colored]{\subtractann}{
 \begin{minted}{elixir}
-def subtract(a, b) do               !\textcolor{gray}{\footnotesize//if b is given an argument of type dynamic()}!
-    a + negate(b)
+def subtract(a, b), do: a + negate(b)    !\textcolor{gray}{\footnotesize\char35{} a, b not annotated, hence dynamic()}!
 \end{minted}
 }
 
 \subsection{Propagation of \texttt{dynamic()}}
 
 \begin{frame}[fragile]{Propagation of \texttt{dynamic()}}\transdissolve<6>
-\textbf{\color{darkslateblue}Apply the (strong function) \code{negate()} function to a \code{dynamic()} argument:}
+\textbf{\color{darkslateblue}Apply the (strong function) \code{negate()} function to a \code{dynamic()} argument: \code{x_dyn}}
 \vspace{-4mm}
 \begin{block}{\vspace{-5mm}}
 \begin{minted}{elixir}
@@ -184,31 +182,38 @@ def negate(x) when is_boolean(x), do: not x
     \only<6->{\dynType}
 \end{overlayarea}
 \hfill
-\vspace{1.7mm}
+\vspace{0.5mm}
 \hfill
 \end{block}
 \pause\pause\vspace{-6mm}
 \begin{block}{\vspace{-6mm}}\vspace{-2mm}
-\begin{overlayarea}{\textwidth}{13mm}
-\only<3,6>{\subtract}
-\only<4,5,7->{\subtractann}
+\begin{overlayarea}{\textwidth}{9mm}
+\only<3>{\subtract}
+\only<4->{\subtractann}
 \end{overlayarea}
 \vspace{-6.5mm}
 \begin{overlayarea}{\textwidth}{2mm}
     \only<5>{\typeError}
-    \only<8>{\goodType}
-    \only<9->{\betterType}
+    \only<7>{\goodType}
+    \only<8->{\betterType}
 \end{overlayarea}
 \hfill
-\vspace{1.7mm}
+\vspace{0.5mm}
 \end{block}
-\pause\pause\pause\pause\pause\pause\pause\vspace{-6mm}
+\pause\pause\pause\pause\pause\pause\vspace{-7mm}
 \begin{block}{\vspace{-5mm}}
 \begin{minted}{elixir}
-def concat(a, b) do
-    a ++ negate(b) 
-end
-#=> Type Error: incompatible types.
+def concat(a, b), do: a <> negate(b)
 \end{minted}
+\vspace{-1mm}
+\begin{warnverbatim}
+\warn incompatible types in binary construction: <<..., negate(b)::binary>>
+got type: dynamic(boolean() or integer()), expected type: binary()
+\textcolor{gray}{(dynamic(t) is how Elixir prints t and dynamic())}
+\end{warnverbatim}
+\vspace{-1mm}
 \end{block}
+\pause
+{\small\textbf{\color{darkslateblue}\code{t and dynamic()} is accepted where \code{s} is expected iff \code{t and s} is not \code{none()}}:
+\code{dynamic()} is forced to materialize into \code{s}, and is propagated to the result.\par}
 \end{frame}

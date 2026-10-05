@@ -81,7 +81,7 @@ Hex & 15,476 & 196 & 207 & 0.065 s & 1.232 s & 5.3\\[-1pt]
 \begin{block}{Real-world Bug Discoveries}
 \begin{itemize}
     \setlength{\itemsep}{0pt}
-\item \textbf{Phoenix} (deployed on 14,600+ websites): an exception handler reads the \code{message} field, which not every exception defines: the error branch can itself crash
+\item \textbf{Phoenix} (deployed on 12,000+ websites): an exception handler reads the \code{message} field, which not every exception defines: the error branch can itself crash
 \item \textbf{Remote} (24,000 modules): \code{String.Chars} called on a tuple in a rarely executed error branch, undetected by tests
 \item \textbf{Dead code}: 14 fixes, at least 179 lines removed in 9 projects (Postgrex, Flame, LiveView, Ecto, ExDoc, Livebook, Ash, Phoenix, Spitfire)
 \item \textbf{v1.20}: porting one company application to 1.20 revealed about 500 problems missed by 1.19, mostly dead code but also real bugs\vspace{-1mm}
