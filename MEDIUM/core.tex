@@ -30,22 +30,34 @@
 \subsection{Simple function types}
 
 
-\begin{frame}[fragile]
-\frametitle{Static Typing 101}
-\begin{block}{A function that always errors}
+% compiler output (abridged from Elixir 1.20.4)
+\DefineVerbatimEnvironment{warnverbatim}{Verbatim}{
+  fontfamily=tt,
+  fontsize=\footnotesize,
+  baselinestretch=0.9,
+  commandchars=\\\{\}
+}
+\newcommand{\warn}{\textcolor{typeOrange}{warning:}}
+
+\begin{frame}[fragile,t]
+\frametitle{Static typing 101}
+\begin{block}{A function that always fails}
 \begin{minted}[escapeinside=!!]{elixir}
 def negate(x) when is_integer(x), do: not x
 \end{minted}
 \end{block}\pause
-\begin{block}{Type error message}
-\begin{minted}[escapeinside=!!]{elixir}
-Type error:
-  |  def negate(x) when is_integer(x), do: not x
-                                           ^^^^^
-        the operator not expects boolean() as arguments,
-        but the argument is integer()
-\end{minted}
+\begin{block}{Type warning}
+\begin{warnverbatim}
+\warn incompatible types given to Kernel.not/1:
+    not x
+given types:
+    integer()
+but expected one of:
+    true
+    false
+\end{warnverbatim}
 \end{block}
+{\small\color{gray}Elixir reports type violations as warnings, so compilation is never interrupted.\par}
 \end{frame}
 
 
@@ -66,21 +78,21 @@ def negate(x) when is_integer(x), do: -x
 \end{minted}
 }
 
-\begin{frame}[fragile]
-\frametitle{Types as contracts between functions.}
-\pause
-\begin{block}{Function A: Negate}
-\visible<3->{%
+\begin{frame}[fragile,t]
+\frametitle{Types as contracts between functions}
+\begin{block}{Function A: negate}
+\visible<2->{%
 \intToInt
 }
 \vspace{-2mm}
-\visible<2->{%
 \negateInt
-}
 \vspace{-1.8mm}
 \end{block}
+\visible<2->{{\small\color{gray}\texttt{\$} introduces a type signature. Elixir writes
+\texttt{or}, \texttt{and}, \texttt{not}, \texttt{term()}, \texttt{none()} for
+$\vee$, $\wedge$, $\neg$, $\Any$, $\Empty$.\par}}
 \pause\pause
-\begin{block}{Function B: Subtract}
+\begin{block}{Function B: subtract}
 \vspace{-1mm}
 \begin{coloredverbatim}
 $ (integer(), integer() -> integer())
@@ -93,11 +105,7 @@ end
 \end{minted}
 \end{block}
 \pause
-\begin{block}{Question}
-\begin{itemize}
-    \item What if we modify the implementation of \code{negate}?
-\end{itemize}
-\end{block}
+\textbf{\color{darkslateblue}What if we modify the implementation of \code{negate}?}
 % \begin{block}{Answer}
 % If the implementation of \code{negate} changes and violates the type contract, it could lead to unexpected behavior or errors in the \code{subtract} function. Ensuring that the contract is maintained helps guarantee the correctness of our code.
 % \end{block}
@@ -118,23 +126,27 @@ def negate(x) when is_boolean(x), do: not x
 
 \subsection{Unions, intersections, negations}
 
-\begin{frame}[fragile]{Union types: correct, but not precise enough.}
+\defverbatim[colored]{\intersection}{
+\begin{coloredverbatim}
+$ (integer()->integer()) \oand (boolean()->boolean())
+\end{coloredverbatim}
+}
+
+\begin{frame}[fragile,t]{Overloading in Elixir: union vs.\ intersection}\transdissolve<5>
 \vspace{-2mm}
 \begin{block}{Adding a clause for booleans}
 \visible<2->{%
-\intBool
+\alt<5->{\intersection}{\intBool}%
 }
 \vspace{-2.1mm}
-\visible<1->{%
 \negateInt
 \vspace{-2.1mm}
 \negateBool
-}
 \vspace{-2.2mm}
 \end{block}
 \pause\pause
 
-\vspace{-4mm}
+\vspace{-5mm}
 
 \begin{block}{\vspace{-5mm}}
 \vspace{-0.2mm}
@@ -149,82 +161,20 @@ end
 \end{minted}
 \end{block}
 \pause
-\begin{block}{Type error in subtract}
-\begin{minted}[fontsize=\footnotesize]{elixir}
-Type error:
-  | def subtract(a, b) when is_integer(a) and is_integer(b) do
-  |   a + negate(b)
-        ^ the operator + expects integer(), integer() as arguments,
-          but the second argument can be integer() or boolean()
-\end{minted}
-\end{block}
-\end{frame}
-% todo: add notes with pdfpc
-% \begin{block}{Explanation}
-% The `+` operator expects two integer arguments, but the second argument can now be an integer \emph{or} a boolean due to the changes in the `negate` function. 
-% \end{block}
-\defverbatim[colored]{\intersection}{
-\begin{coloredverbatim}
-$ (integer()->integer()) \oand (boolean()->boolean())
-\end{coloredverbatim}
-}
-\defverbatim[colored]{\intersectionHalf}{
-\begin{coloredverbatim}
-$ (integer()->integer()) \oand
-\end{coloredverbatim}
-}
-\defverbatim[colored]{\negateIntBool}{
-\begin{minted}[escapeinside=!!]{elixir}
-def negate(x) when is_integer(x), do: -x
-def negate(x) when is_boolean(x), do: not x
-\end{minted}
-}
-
-\defverbatim[colored]{\intersection}{
-\begin{coloredverbatim}
-$ (integer()->integer()) \oand (boolean()->boolean())
-\end{coloredverbatim}
-}
-\defverbatim[colored]{\intersectionHalf}{
-\begin{coloredverbatim}
-$ (integer()->integer()) \oand
-\end{coloredverbatim}
-}
-\defverbatim[colored]{\negateIntBool}{
-\begin{minted}[escapeinside=!!]{elixir}
-def negate(x) when is_integer(x), do: -x
-def negate(x) when is_boolean(x), do: not x
-\end{minted}
-}
-
-
-\begin{frame}[fragile]
-\frametitle{Type intersections for functions.}
-\begin{block}{A more precise annotation}
-\vspace{-4.9mm}
-\begin{overlayarea}{\textwidth}{.8cm}
-% \only<2>{\intersectionHalf}
-\only<2->{\intersection}    
-\end{overlayarea}
-\vspace{.4mm}
-% \hfill
-% \vspace{1mm}
-\negateIntBool
-\vspace{-0.7mm}
-\end{block}
-\pause\pause
-\begin{block}{The function \texttt{subtract} type checks}
-\vspace{-2mm}
-\begin{coloredverbatim}
-$ (integer(), integer() -> integer())
-\end{coloredverbatim}
-\vspace{-2.1mm}
-\begin{minted}[escapeinside=!!]{elixir}
-def subtract(a, b) when is_integer(a) and is_integer(b) do
+\begin{onlyenv}<4>
+\begin{block}{Type warning in subtract}
+\begin{warnverbatim}
+\warn incompatible types given to Kernel.+/2:
     a + negate(b)
-end
-\end{minted}
+given types: integer(), integer() or boolean()
+but expected one of: integer(), integer()  ...
+\end{warnverbatim}
+\vspace{-1.5mm}
 \end{block}
+\end{onlyenv}
+\begin{onlyenv}<5>
+\textbf{\color{darkslateblue}With the intersection type, \code{subtract} type checks}
+\end{onlyenv}
 \end{frame}
 
 \defverbatim[colored]{\lognegType}{
@@ -238,8 +188,8 @@ $ (false \oor nil -> true) \oand
 \end{coloredverbatim}
 }
 
-\begin{frame}[fragile]
-\frametitle{Singleton and Negation Types}
+\begin{frame}[fragile,t]
+\frametitle{Singleton and negation types}
 \begin{block}{Logical negation}%
 \vspace{-9mm}
 \begin{overlayarea}{\textwidth}{0.5mm}%
@@ -253,11 +203,10 @@ def logical_neg(x), do: false
 \end{minted}
 \end{block}
 \pause
-\begin{block}{Types}
+\begin{block}{As for \texttt{toBoolean} in TypeScript}
 \begin{itemize}
-    \item Singleton types are types containing exactly one value
-    \visible<3->{\item Negation types contain any value that is \emph{not} in the 
-    negated type.}
+    \item \code{false or nil} is Elixir's \textsf{Falsy}: a union of singleton types
+    \visible<3->{\item \code{not (false or nil)} is Elixir's \textsf{Truthy}: a negation type}
 \end{itemize}
 \end{block}
 
@@ -282,8 +231,8 @@ def map([], _fun), do: []
 
 
 \subsection{Polymorphism}
-\begin{frame}[fragile]
-\frametitle{Polymorphism with Local Type Inference}
+\begin{frame}[fragile,t]
+\frametitle{Polymorphism with type inference}
 
 \begin{block}{Expressions and functions can have types containing type variables}
 \vspace{-7.2mm}
@@ -295,15 +244,10 @@ def map([], _fun), do: []
 \visible<1->{\map}
 \vspace{-1.5mm}
 \end{block}
-\pause
-\begin{block}{Type Variables}
-    \begin{itemize}
-        \item Quantified using a postfix \texttt{\color{typeBrique}when} with upper bounds
-        % \item First-order polymorphism only
-    \end{itemize}
-\end{block}
-\pause
-\begin{block}{System deduces type variable instantiation}
+\visible<2->{{\small\color{gray}Type variables are quantified by a postfix
+\texttt{\color{typeBrique}when}, with upper bounds\par}}
+\pause\pause
+\begin{block}{Instantiation of type variables is inferred (tallying)}
 \begin{minted}{elixir}
 map([{0, true}], fn {x, y} when is_integer(x) -> x end)
 # type [integer()]
@@ -333,7 +277,7 @@ $ ((false \oor nil, a) -> a) \oand
 
 \begin{frame}[fragile]{Intersection and polymorphism}\transdissolve<4->
 
-\begin{block}{Logical OR}%
+\begin{block}{Logical OR (\texttt{logicalOr} in TypeScript)}%
 \vspace{-7mm}
 \begin{overlayarea}{\textwidth}{2mm}
     \only<2>{\logorFirst}
@@ -347,10 +291,10 @@ def logical_or(x, _), do: x
 \end{minted}
 \end{block}
 \pause\pause\pause\pause
-\textbf{\color{darkslateblue}Bounded Polymorphism:}
-\[\color{typeBrique}\forall (s{\leq}\alpha{\leq} u).t \quad\stackrel{def}{=}\quad (\forall \alpha).t[\alpha:=(s{\vee}(\alpha{\wedge} u))]\]
+\textbf{\color{darkslateblue}Bounded polymorphism} {\small\color{gray}($t,u$ types; $u=\textsf{Truthy}$ gives the $\alpha\wedge\textsf{Truthy}$ of \texttt{logicalOr})}
+\[\color{typeBrique}\forall (\alpha{\leq} u).t \quad\stackrel{\text{def}}{=}\quad \forall \alpha.\,t[\alpha:=\alpha{\wedge} u]\]
 \only<4>{\begin{textblock}{5}(0,0)
-\includegraphics[scale=1]{images/slide-bounded_q.pdf}
+\includegraphics[scale=1]{images/hw-bounded_q.pdf}
 \end{textblock}}
 \end{frame}
 

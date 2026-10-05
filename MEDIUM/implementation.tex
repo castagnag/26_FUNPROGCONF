@@ -4,16 +4,39 @@
 \tableofcontents[currentsection]
 \end{frame}
 
+\begin{frame}[fragile]
+\frametitle{Elixir 1.20: typing without annotations}\vspace{-3mm}
+\begin{itemize}\setlength{\itemsep}{2pt}
+\item No annotation, no syntactic change: every parameter is typed \code{dynamic()}
+\item Types are refined by patterns and guards (guard analysis, Section~3)
+\item Inferred types are checked by gradual typing (Section~4)
+\item Multi-clause functions get intersection types, from a fine-grained analysis of
+      their guards:
+\end{itemize}
+\vspace{-1mm}
+\begin{block}{\vspace{-5mm}}
+\begin{minted}[fontsize=\footnotesize]{elixir}
+def bad(b) when is_boolean(b), do: 1 + negate(b)
+# warning: incompatible types given to Kernel.+/2
+#   given types: integer(), dynamic(boolean())
+\end{minted}
+\vspace{-1mm}
+\end{block}
+\pause
+\textbf{\color{darkslateblue}Type signatures} (the \texttt{\$} of this talk) are planned, after
+efficient recursive and parametric types (the polymorphism of Section~2), map traversal,
+and typed structs.
+\end{frame}
+
 \begin{frame}
-\frametitle{Status of the Integration}\vspace{-4mm}
+\frametitle{Status of the integration}\vspace{-4mm}
 \begin{itemize}\setlength{\itemsep}{0pt}
 \item v1.17 (June 2024): gradual set-theoretic types for atoms, maps, basic types
 \item v1.18: type-checked function calls, inference for patterns and return types
 \item v1.19 (Oct.\ 2025): all constructs; function types; \textit{protocols} (\`a la type classes)
 \item \textbf{v1.20 (June 2026, now 1.20.4): typing covers the whole language}: full guard analysis, intersection types inferred for multi-clause functions
 \end{itemize}
-\textcolor{darkslateblue}{\textbf{No syntactic change, no type annotation required}}
-\pause\smallskip
+\pause\medskip
 
 \small
 \begin{tabular}{|l|r|r|r|r|r|r|}
@@ -35,7 +58,7 @@ Hex & 15,476 & 196 & 207 & 0.065 s & 1.232 s & 5.3\\[-1pt]
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{Status of the Integration}\vspace{-3mm}
+\frametitle{Status of the integration}\vspace{-3mm}
 \begin{itemize}
 \item Very positive feedback from developers on versions 1.17 to 1.20
 \item No syntactic changes and no annotations required: particularly appreciated
@@ -56,7 +79,7 @@ Hex & 15,476 & 196 & 207 & 0.065 s & 1.232 s & 5.3\\[-1pt]
 \end{frame}
 
 \begin{frame}[fragile]
-\frametitle{\mbox{Several Languages use (more or less) Semantic Subtyping:}}
+\frametitle{\mbox{Several languages use (more or less) semantic subtyping}}
 \hspace*{-0.8em}%
 \begin{minipage}{1.06\textwidth}
   \setlength{\leftmargini}{1.9em}
@@ -76,7 +99,7 @@ Hex & 15,476 & 196 & 207 & 0.065 s & 1.232 s & 5.3\\[-1pt]
   \item \textbf{Luau} (Roblox) — falls back to semantic subtyping when
         syntactic subtyping is insufficient
 
-  \item \textbf{Erlang} — \emph{RPTU} (Kaiserlautern) develops \textsl{Ethylizer} which reconstructs set-theoretic types  for unannotated
+  \item \textbf{Erlang} — \emph{RPTU} (Kaiserslautern) develops \textsl{Ethylizer} which reconstructs set-theoretic types  for unannotated
         code by using our semantic subtyping algorithms and techniques; \\
         \emph{Meta} develops \textsl{eqWAlizer} to type WhatsApp's Erlang codebase, building on our semantic-subtyping-based gradual typing.
 
@@ -147,7 +170,7 @@ In collaboration with \emph{Università degli Studi di Bologna} (Italy) and \emp
 %%  SLIDE 10 — Why this is the most promising approach
 %% ----------------------------------------------------------
 \begin{frame}
-\frametitle{A Proven Approach}
+\frametitle{A proven approach}
 
 \begin{enumerate}\setlength{\itemsep}{4pt}
 
@@ -173,7 +196,7 @@ In collaboration with \emph{Università degli Studi di Bologna} (Italy) and \emp
 
   \item \textbf{\color{darkslateblue}Supports formal certification.}
     Soundness is proved, not just tested — directly relevant to
-    regulatory requirements for certified software.
+    regulatory requirements for evidence of software assurance.
 
 \end{enumerate}
 

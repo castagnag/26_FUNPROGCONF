@@ -16,9 +16,10 @@
     \begin{block}{Why static types?}\setlength{\baselineskip}{0.85\baselineskip}\setlength{\leftmargini}{1.2em}
       \begin{itemize}\setlength{\itemsep}{4pt}
         \item \textbf{Catch bugs early}: type errors are found at compile
-              time, before the code runs in production
-        \item \textbf{Living documentation}: types state what a function
-              expects and returns, always consistent with the code
+              time, before the code runs
+        \item \textbf{Readable code/docs}: code is increasingly written by AI and
+              \emph{read} by programmers; types state what each function expects
+              and returns, checked against the code
         \item \textbf{Tooling}: precise auto-completion, IDE navigation,
               and safe refactoring
       \end{itemize}
@@ -38,11 +39,12 @@
     \end{block}
   \end{column}
 \end{columns}
+\setbeamercolor{block body alerted}{bg=red!8}
 \begin{alertblock}{Regulatory compliance}\setlength{\baselineskip}{0.85\baselineskip}
   EU and US regulations increasingly \textbf{require evidence of
   software assurance} (CRA, NIST guidelines, \ldots).  A
   \emph{sound} type system is a concrete, mechanically verifiable
-  step in that direction. No manual proofs required.
+  step in that direction. No manual proofs required, also for AI-generated code.
 \end{alertblock}
 
 \end{frame}
@@ -131,9 +133,9 @@ function double (x) {
 \begin{exampleblock}{Use set-theoretic types}
   \begin{itemize}
      \item Naive solution, union types:\quad \pb{(number$\vee$string)$\to$(number$\vee$string)}\\
-       {\small\color{gray}\pb{double(42)} has type \pb{number$\vee$string}, so \pb{double(42)+1} is rejected}
+       {\small\color{gray}\alt<5->{\pb{double(42)} has type \pb{number}, so \pb{double(42)+1} is accepted}{\pb{double(42)} has type \pb{number$\vee$string}, so \pb{double(42)+1} is rejected}}
        \pause\pause
-     \item Better solution, intersection types:\quad \pb{\color<5>{darkred}(number$\to$number) $\wedge$ (string$\to$string)}
+     \item Better solution, intersection types:\quad \pb{(number$\to$number) $\wedge$ (string$\to$string)}
   \end{itemize}
 \end{exampleblock}
 \end{frame}
