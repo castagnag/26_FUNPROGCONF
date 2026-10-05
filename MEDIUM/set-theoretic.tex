@@ -170,71 +170,55 @@ toBoolean : (\scT{Truthy} \scT{$\to$} \scV{true}) \scO{$\wedge$} (\scT{Falsy} \s
 
 
 
-\begin{frame}[fragile]
+\begin{frame}[fragile,t]
 \frametitle{3. Precise typing of pattern matching (I)}\vspace{-1.3mm}
 
 We consider the following possibly recursive types:
 
-{\Bl$$\T\ ::=\  \Bool\,\mid\,\Int\,\mid\,\pair\T\T\,\mid\,\T\To\T \,\mid\,{\color{darkgreen}\T\Or\T}\,\mid\,{\color{darkgreen}\T\!\And\!\T} \,\mid\, {\color{darkgreen} \neg\T}\,\mid\,{\color{darkred}\Any}\,\mid\,{\color{darkred}\Empty}\,\mathrel{\textcolor<-3>{white}{\mid}}\,~\textcolor<-3>{white}{\textcolor<4>{magenta}{\alpha}}\,\mathrel{\textcolor<-4>{white}{\mid}}\, \textcolor<-4>{white}{\textcolor<5>{magenta}{c}} $$}%
+{\Bl$$\T\ ::=\  \Bool\,\mid\,\Int\,\mid\,\pair\T\T\,\mid\,\T\To\T \,\mid\,{\color{darkgreen}\T\Or\T}\,\mid\,{\color{darkgreen}\T\!\And\!\T} \,\mid\, {\color{darkgreen} \neg\T}\,\mid\,{\color{darkred}\Any}\,\mid\,{\color{darkred}\Empty}\,\mathrel{\textcolor{white}{\mid}}\,~\textcolor{white}{\alpha}\,\mathrel{\textcolor{white}{\mid}}\, \textcolor{white}{c} $$}%
 % handwritten annotations (from the LONG version, background removed)%
 \only<2>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-settheore.pdf}\end{textblock}}%
 \only<3>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-topbottom.pdf}\end{textblock}}%
-\only<4>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-variables.pdf}\end{textblock}}%
-\only<5>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-singleton.pdf}\end{textblock}}%
-\pause[6]%
-And let us type the following pattern matching expression:
-
-\hspace*{5mm}{\Bl$\texttt{ match }  e  \texttt{ with } p_1 \texttt{ -> } e_1 \texttt{ | } p_2\texttt{ -> } e_2$}
-
-where patterns are defined as follows:
-\centerline{$\Bl p ::= c \ \mid\ x \ \mid\  \patpair{p}{p} \ \mid\ p\mathbin{\textsf{or}}p\ \mid\ p\mathbin{\textsf{and}}p $}
-\pause%
-If we interpret types as sets of values
-\centerline{$\Bl
-\sem{\T} = \{ v\mid v\text{ is a value of type }\T\}$}
-\pause
-then \textbf{\color{darkslateblue}the set of all values that match a pattern is a type}
+\pause[4]%
+\medskip
+\textbf{\color{darkslateblue}The values that match a pattern $p$ form a type}:
 \centerline{\color{magenta}
 $\accept{p} = \{ v\mid v\text{ is a value that matches }p\}
 $}
 
-\textbf{\color{darkslateblue}(the accepted type of pattern $p$)}.
+\textbf{\color{darkslateblue}(the accepted type of pattern $p$)}, e.g., $\Bl\accept{\patpair{x}{y}}=\pair\Any\Any$, the type of all pairs.
 \end{frame}
 
 
 
 \begin{frame}
-\frametitle{3. Precise typing of pattern matching (II)}\xdef\matchframenumber{\insertframenumber}% referenced in core.tex\transdissolve<10>
+\frametitle{3. Precise typing of pattern matching (II)}\xdef\matchframenumber{\insertframenumber}% referenced in core.tex\transdissolve<4>
 
 \textbf{Boolean type connectives are needed to type pattern matching:}
 
-\pause
 \smallskip
 
-    \hspace*{5mm}{\Bl$\texttt{ match }  e  \texttt{ with } p_1 \texttt{ -> } e_1 \texttt{ | } p_2\texttt{ -> } e_2$}\pause
+    \hspace*{5mm}{\Bl$\texttt{ match }  e  \texttt{ with } p_1 \texttt{ -> } e_1 \texttt{ | } p_2\texttt{ -> } e_2$}
 
    \smallskip
 
 Suppose that $\Bl e:\T$\\[-2mm]
 
-\pause
 
-  - To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T{\color<8->{magenta}\mypmb<8->{\And}}\accept{p_1}$};
+  - To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \accept{p_1}$};
 
-\pause
 
-  - To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T{\color<8->{magenta}\,\mypmb<8->{\backslash}}\accept{p_1}){\color<8->{magenta}\mypmb<8->{\And}}\accept{p_2}$;}\hspace*{18mm} {\textcolor{gray}{\small($\texttt{S}\setminus\T$ stands for $\texttt{S}\!{\And}\!\textcolor<8->{magenta}{\neg}{\T}$)}}
+  - To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\,\backslash \accept{p_1})\And \accept{p_2}$;}\hspace*{18mm} {\textcolor{gray}{\small($\texttt{S}\setminus\T$ stands for $\texttt{S}\!{\And}\!\neg{\T}$)}}
 
 \pause
 
-  - The type of the match expression is {\color{blue}$\T_1{\color<8->{magenta}\mypmb<8->{\Or}}\T_2$}.
+  - The type of the match expression is {\color{blue}$\T_1\Or \T_2$}.
+
+
+  - Pattern matching is exhaustive if $\color{blue}\T\leq\accept{p_1}\Or \accept{p_2}$.
+
 
 \pause
-
-  - Pattern matching is exhaustive if $\color{blue}\T\leq\accept{p_1}{\color<8->{magenta}\mypmb<8->{\Or}}\accept{p_2}$.
-
-
-\pause\pause
 \textbf{Formally:}
 \vspace{-2mm}
 \begin{mathpar}\Bl
@@ -247,7 +231,7 @@ Suppose that $\Bl e:\T$\\[-2mm]
 \small\color{gray}
 where $\Bl \T/p$ is the type for the capture variables in $\Bl p$ when it is matched against values in $\Bl \T$.
 
-\only<10>{\begin{textblock}{5}(0,0)
+\only<4>{\begin{textblock}{5}(0,0)
 \includegraphics[scale=1]{images/hw-caseexp.pdf}
 \end{textblock}}
 \end{frame}
