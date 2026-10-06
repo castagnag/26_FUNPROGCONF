@@ -71,7 +71,7 @@ type Payment = !\tsLabel!
 \frametitle{2. Overloading}
 \structure{\bf Aka \emph{ad hoc} polymorphism: functions that execute different code on arguments of different types}
 
-\begin{minted}{typescript}
+\begin{minted}[fontsize=\normalsize]{typescript}
 function double (x) {!\tsLabel!
     return (typeof(x) === "number") ? 2*x : x.concat(x);
 }
@@ -86,49 +86,30 @@ If applied to a number returns a number, if applied to a string returns a string
 
 
 
-\begin{frame}[fragile,t]
-\frametitle{3. Precise typing of pattern matching (I)}\vspace{-1.3mm}
-
-We consider the following possibly recursive types:
-
-{\Bl$$\T\ ::=\  \Bool\,\mid\,\Int\,\mid\,\pair\T\T\,\mid\,\T\To\T \,\mid\,{\color{darkgreen}\T\Or\T}\,\mid\,{\color{darkgreen}\T\!\And\!\T} \,\mid\, {\color{darkgreen} \neg\T}\,\mid\,{\color{darkred}\Any}\,\mid\,{\color{darkred}\Empty}\,\mathrel{\textcolor{white}{\mid}}\,~\textcolor{white}{\alpha}\,\mathrel{\textcolor{white}{\mid}}\, \textcolor{white}{c} $$}%
-% handwritten annotations (from the LONG version, background removed)%
-\only<2>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-settheore.pdf}\end{textblock}}%
-\only<3>{\begin{textblock}{5}(0,0)\includegraphics[scale=1]{images/hw-topbottom.pdf}\end{textblock}}%
-\pause[4]%
-\medskip
-\textbf{\color{darkslateblue}The values that match a pattern $p$ form a type}:
-\centerline{\color{magenta}
-$\accept{p} = \{ v\mid v\text{ is a value that matches }p\}
-$}
-
-\textbf{\color{darkslateblue}(the accepted type of pattern $p$)}, e.g., $\Bl\accept{\patpair{x}{y}}=\pair\Any\Any$, the type of all pairs.
-\end{frame}
-
-
-
 \begin{frame}
-\frametitle{3. Precise typing of pattern matching (II)}\xdef\matchframenumber{\insertframenumber}\transdissolve<4>% \matchframenumber is referenced in core.tex
+\frametitle{3. Precise typing of pattern matching}\xdef\matchframenumber{\insertframenumber}\transdissolve<5>% \matchframenumber is referenced in core.tex
+
+\textbf{\color{darkslateblue}Accepted type of a pattern $p$:} {\color{magenta}$\accept{p} = \{ v\mid v\text{ matches }p\}$}, e.g., $\Bl\accept{\patpair{x}{y}}=\pair\Any\Any$
+
+\smallskip
 
 \textbf{\color{darkslateblue}Boolean type connectives are needed to type pattern matching:}
 
 \smallskip
 
-    \hspace*{5mm}{\Bl$\texttt{ match }  e  \texttt{ with } p_1 \texttt{ -> } e_1 \texttt{ | } p_2\texttt{ -> } e_2$}
-
-   \smallskip
-
-Suppose that $\Bl e:\T$\vspace{2mm}
+    \hspace*{5mm}{\Bl$\texttt{ match }  e  \texttt{ with } p_1 \texttt{ -> } e_1 \texttt{ | } p_2\texttt{ -> } e_2$}\quad with $\Bl e:\T$\vspace{2mm}
+\pause
 {\setlength{\leftmargini}{0.75em}\setlength{\labelsep}{0.3em}%
 \begin{itemize}\setlength{\topsep}{3.5mm}\setlength{\itemsep}{0.2mm}
 \item To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \accept{p_1}$};
-\item To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\setminus \accept{p_1})\And \accept{p_2}$;}\hfill{\textcolor{gray}{\small($\texttt{S}\setminus\T = \texttt{S}\!{\And}\!\neg{\T}$: negation)}}
+\item To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\setminus \accept{p_1})\And \accept{p_2}$;}
 \pause
 \item The type of the match expression is {\color{blue}$\T_1\Or \T_2$}.
 \item Pattern matching is exhaustive if $\color{blue}\T\leq\accept{p_1}\Or \accept{p_2}$.
 \end{itemize}}
 \vspace{-1mm}
-\pause
+\begin{overprint}
+\onslide<4-5>
 \textbf{Formally:}
 \vspace{-2mm}
 \begin{mathpar}\Bl
@@ -138,10 +119,17 @@ Suppose that $\Bl e:\T$\vspace{2mm}
 \end{mathpar}
 \vspace{-4mm}
 
-\small\color{gray}
-where $\Bl \T/p$ is the type for the capture variables in $\Bl p$ when it is matched against values in $\Bl \T$.
+{\small\color{gray}
+where $\Bl \T/p$ is the type for the capture variables in $\Bl p$ when it is matched against values in $\Bl \T$.\par}
+\onslide<6>
+\medskip
+\begin{exampleblock}{$\Rightarrow$ Negation types are needed}
+To type $\Bl e_2$ we remove from $\Bl\T$ the values accepted by $\Bl p_1$:\quad
+{\color{blue}$\T\setminus\accept{p_1} = \T\And\neg\accept{p_1}$}
+\end{exampleblock}
+\end{overprint}
 
-\only<4>{\begin{textblock}{5}(0,0)
+\only<5>{\begin{textblock}{5}(0,0)
 \includegraphics[scale=1]{images/hw-caseexp.pdf}
 \end{textblock}}
 \end{frame}
@@ -150,13 +138,18 @@ where $\Bl \T/p$ is the type for the capture variables in $\Bl p$ when it is mat
 \begin{frame}
 \frametitle{Semantic subtyping}\vspace{-4mm}
 
-Union and intersection types are now common (TypeScript, Python, Scala 3, Ceylon, \ldots);
-negation types are rare.
+Unions and intersections are common (TypeScript, Python, Scala); negations are rare.
 
 \smallskip
-\textbf{\color{darkslateblue}Our approach: \emph{semantic subtyping}, i.e., subtyping defined by what types mean.}
+\textbf{\color{darkslateblue}Our approach: \emph{semantic subtyping}, defined by what types mean.}
 
-\smallskip
+\medskip\vspace{4mm}
+\centerline{\llap{Types:\quad}{\Bl$\T\ ::=\  \Bool\,\mid\,\Int\,\mid\,\pair\T\T\,\mid\,\T\To\T \,\mid\,{\color{darkgreen}\T\Or\T}\,\mid\,{\color{darkgreen}\T\!\And\!\T} \,\mid\, {\color{darkgreen} \neg\T}\,\mid\,{\color{darkred}\Any}\,\mid\,{\color{darkred}\Empty}\rlap{\qquad\text{\scriptsize\color{gray}(possibly recursive)}}\,\mathrel{\phantom{\mid}}\,~\phantom{\alpha}\,\mathrel{\phantom{\mid}}\, \phantom{c}$}}%
+% handwritten annotations (from the LONG version, background removed), shifted down to the grammar
+\only<2>{\begin{textblock}{5}(0,0.49)\includegraphics[scale=1]{images/hw-settheore.pdf}\end{textblock}}%
+\only<3>{\begin{textblock}{5}(0,0.49)\includegraphics[scale=1]{images/hw-topbottom.pdf}\end{textblock}}%
+\pause[4]%
+\vspace{-1mm}
 \begin{columns}[T,onlytextwidth]
   \begin{column}{0.58\textwidth}
     \begin{block}{How does it work?}
