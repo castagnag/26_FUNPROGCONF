@@ -18,7 +18,7 @@
     \item \textbf{Checked documentation}: types state what functions expect and
           return; crucial when code is written by AI and read by programmers
     \item \textbf{Existing solutions fall short}: TypeScript, Flow, Hack are
-          language-specific and unsound; rewriting in a typed language takes years
+          language-specific and unsound; rewriting in a typed language may take years for large codebases
     \item \textbf{Needed}: a type system that is \textbf{sound},
           \textbf{gradual}, \textbf{automated}, and \textbf{open}
   \end{itemize}
@@ -40,6 +40,7 @@ type systems cannot describe}
 
 % language tag in the top right corner of TypeScript code boxes (put at the end of the first line)
 \newcommand{\tsLabel}{\hfill\textcolor{gray}{\sffamily{\scriptsize T}{\tiny YPE}{\scriptsize S}{\tiny CRIPT}}}% faked small caps: the sans font (Carlito) has none
+\newcommand{\jsLabel}{\hfill\textcolor{gray}{\sffamily{\scriptsize J}{\tiny AVA}{\scriptsize S}{\tiny CRIPT}}}% same, for untyped JavaScript code
 \begin{frame}[fragile]\transdissolve
 \frametitle{1. Branching and discriminated unions}\vspace{-4mm}
 \begin{minted}[fontsize=\normalsize]{typescript}
@@ -72,7 +73,7 @@ type Payment = !\tsLabel!
 \structure{\bf Aka \emph{ad hoc} polymorphism: functions that execute different code on arguments of different types}
 
 \begin{minted}[fontsize=\normalsize]{typescript}
-function double (x) {!\tsLabel!
+function double (x) {!\jsLabel!
     return (typeof(x) === "number") ? 2*x : x.concat(x);
 }
 \end{minted}

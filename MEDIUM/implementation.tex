@@ -209,70 +209,32 @@ m.b + 1                                 !\goodNum!
 {\scriptsize\color{gray}Modules: with A.~Boussaa, A.~Bretagne, J.~Valim.\quad Processes: with L.~Padovani, D.~Varacca.\quad Syntax not final.\par}
 \end{frame}
 
-\end{document}
 
 %% ----------------------------------------------------------
-%%  SLIDE 10 — Why this is the most promising approach
-%% ----------------------------------------------------------
-\begin{frame}
-\frametitle{A proven approach}
-
-\begin{enumerate}\setlength{\itemsep}{4pt}
-
-  \item \textbf{\color{darkslateblue}Faithful to the semantics.}
-    $T_1 \leq T_2$ means exactly $\llbracket T_1\rrbracket \subseteq
-    \llbracket T_2\rrbracket$ — no axioms, no approximations.
-
-  \item \textbf{\color{darkslateblue}Designed for dynamic idioms.}
-    Overloading, pattern matching, and non-uniform branching are all
-    described \emph{naturally}, without awkward workarounds.
-
-  \item \textbf{\color{darkslateblue}Gradual typing.}
-    Works incrementally.  No flag day, no forced full rewrite.  Start
-    with nothing and add types where they help.
-
-  \item \textbf{\color{darkslateblue}Proven in production.}
-    Already integrated in Elixir, Python, Ballerina, Erlang.  Finding
-    real bugs in real codebases \emph{today}.
-
-  \item \textbf{\color{darkslateblue}Solid theoretical foundations.}
-    Backed by 15+ years of peer-reviewed work (JACM, POPL, ICFP,
-    OOPSLA).  
-
-  \item \textbf{\color{darkslateblue}Supports formal certification.}
-    Soundness is proved, not just tested — directly relevant to
-    regulatory requirements for evidence of software assurance.
-
-\end{enumerate}
-
-\end{frame}
-
-
-%% ----------------------------------------------------------
-%%  SLIDE 11 — Takeaways
+%%  Conclusion (one slide, for a functional-programming audience)
 %% ----------------------------------------------------------
 \begin{frame}
-\frametitle{Takeaways} \vspace*{-6mm}
-
-\begin{enumerate}[<+->]\setlength{\itemsep}{6pt}
-
-  \item Dynamic languages need static typing — for correctness, tooling,
-        and regulatory confidence.
-
-  \item Traditional type systems were not built for dynamic idioms.
-        A new model is needed.
-
-  \item Set-theoretic types with semantic subtyping provide that model:
-        \emph{expressive, correct, and well-founded}.
-
-  \item Gradual adoption means no disruption — start typing today,
-        incrementally.
-
-  \item Already validated across 8+ languages and real-world production
-        codebases.
-
-  \item \textbf{\color{darkslateblue}The theory is solid —and still advancing. The practice is proven. The adoption is growing}
-
-\end{enumerate}
-
+\frametitle{Conclusion}\vspace{-2mm}
+{\small
+\begin{itemize}\setlength{\itemsep}{4pt}
+  \item \textbf{\color{darkslateblue}Types are sets of values.}
+    Unions, intersections and negations are set operations, subtyping is inclusion:
+    they describe tagged unions, overloading and pattern matching, the everyday idioms
+    of dynamic functional code.
+  \item \textbf{\color{darkslateblue}Inferred from patterns and guards.}
+    With no annotation, multi-clause functions get intersection types, each clause sees
+    a narrowed type, and the compiler reports non-exhaustive matches and dead clauses.
+  \item \textbf{\color{darkslateblue}Gradual, without casts.}
+    \code{dynamic()} plus strong functions: run-time semantics unchanged, existing
+    code compiles as before.
+  \item \textbf{\color{darkslateblue}In production.}
+    Elixir type-checks the whole language since v1.20 and finds real bugs; the same
+    theory is used by Python's \textsf{ty}, Erlang tools, Luau, Ballerina.
+  \item \textbf{\color{darkslateblue}Next.}
+    Type signatures, then modules, processes, record type comprehensions.
+\end{itemize}}
+\pause
+\smallskip
+{\centering\textbf{\color{darkslateblue}Set-theoretic types fit languages built on pattern matching:\\
+the theory is ready, and it runs in production.}\par}
 \end{frame}
