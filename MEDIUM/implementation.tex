@@ -7,7 +7,7 @@
 \begin{frame}[fragile]
 \frametitle{Elixir 1.20: typing without annotations}\vspace{-4mm}
 \begin{itemize}\setlength{\itemsep}{0pt}
-\item No annotation, no syntactic change: every parameter is typed \code{dynamic()}
+\item No annotation, no syntax change, no type variables: parameters are \code{dynamic()}
 \item Types are refined by patterns and guards (guard analysis, Section~3)
 \item Inferred types are checked by gradual typing (Section~4)
 \item Multi-clause functions get intersection types from their guards (Section~3),
@@ -34,9 +34,8 @@ given types: integer(), dynamic(boolean())   \textcolor{gray}{(i.e., boolean() a
 \vspace{-1mm}
 \end{block}
 \pause
-{\small\textbf{\color{darkslateblue}Type signatures} (the \texttt{\$} of this talk) are planned, after
-efficient recursive and parametric types (the polymorphism of Section~2), map traversal,
-and typed structs.\par}
+{\small\textbf{\color{darkslateblue}Type signatures} (the \texttt{\$} of this talk), and with them type variables, are
+planned after efficient recursive and parametric types, map traversal, and typed structs are implemented.\par}
 \end{frame}
 
 \begin{frame}
