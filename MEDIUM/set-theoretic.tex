@@ -11,75 +11,28 @@
 
 \vspace{-3mm}
 \small
-\begin{columns}[T,onlytextwidth]
-  \begin{column}{0.48\textwidth}
-    \begin{block}{Why static types?}\setlength{\baselineskip}{0.85\baselineskip}\setlength{\leftmargini}{1.2em}
-      \begin{itemize}\setlength{\itemsep}{4pt}
-        \item \textbf{Catch bugs early}: type errors are found at compile
-              time, before the code runs
-        \item \textbf{Tooling}: precise auto-completion, IDE navigation,
-              and safe refactoring
-        \item \textbf{Readable code/docs}: code is increasingly written by AI and
-              \emph{read} by programmers; types state what each function expects
-              and returns, checked against the code
-      \end{itemize}
-    \end{block}
-  \end{column}
-  \begin{column}{0.48\textwidth}
-    \begin{block}{Why not existing solutions?}\setlength{\baselineskip}{0.85\baselineskip}\setlength{\leftmargini}{1.2em}
-      \begin{itemize}\setlength{\itemsep}{4pt}
-        \item Typed variants developed by large companies (TypeScript,
-              Flow, Hack) are \textbf{language-specific} and give
-              \textbf{no soundness guarantee}
-        \item Full rewrites into statically typed languages require
-              \emph{years of work} and major resources
-        \item Needed: a type system that is \textbf{sound},
-              \textbf{gradual}, \textbf{automated}, and \textbf{open}
-      \end{itemize}
-    \end{block}
-  \end{column}
-\end{columns}
+\begin{block}{Static types for dynamic languages}\setlength{\leftmargini}{1.2em}
+  \begin{itemize}\setlength{\itemsep}{3pt}
+    \item \textbf{Catch bugs early} and enable \textbf{tooling}: completion,
+          navigation, safe refactoring
+    \item \textbf{Checked documentation}: types state what functions expect and
+          return; crucial when code is written by AI and read by programmers
+    \item \textbf{Existing solutions fall short}: TypeScript, Flow, Hack are
+          language-specific and unsound; rewriting in a typed language takes years
+    \item \textbf{Needed}: a type system that is \textbf{sound},
+          \textbf{gradual}, \textbf{automated}, and \textbf{open}
+  \end{itemize}
+\end{block}
 \setbeamercolor{block body alerted}{bg=red!8}
 \begin{alertblock}{Regulatory compliance}\setlength{\baselineskip}{0.85\baselineskip}
   EU and US regulations increasingly \textbf{require evidence of
-  software assurance} (CRA, NIST guidelines, \ldots).  A
-  \emph{sound} type system is a concrete, mechanically verifiable
-  step in that direction. No manual proofs required, also for AI-generated code.
+  software assurance} (CRA, NIST guidelines, \ldots). A
+  \emph{sound} type system is a mechanically verifiable step in that direction,
+  also for AI-generated code.
 \end{alertblock}
 
-\end{frame}
-
-%% ----------------------------------------------------------
-%%  SLIDE 3 — The challenge
-%% ----------------------------------------------------------
-\begin{frame}
-\frametitle{The challenge: dynamic code does not fit classic types}
-
-Dynamic languages are expressive \emph{because} they use programming
-patterns that traditional type systems cannot describe:
-
-\bigskip
-
-\begin{block}{1. \; Branching and discriminated unions}\setlength{\baselineskip}{0.8\baselineskip}
-  A dedicated tag field in a record or a tuple is used as a discriminant to determine the type of the remaining values (tagged unions).   \textbf{Union types and singleton types} are needed.
-\end{block}
-
-%\bigskip
-
-\begin{block}{2. \; Overloading (ad hoc polymorphism)}\setlength{\baselineskip}{0.8\baselineskip}
-  The same function behaves differently depending on whether it receives, say,
-  an integer or a string.
-  \textbf{Intersection types} are needed.
-\end{block}
-
-%\bigskip
-
-\begin{block}{3. \; Pattern matching}\setlength{\baselineskip}{0.8\baselineskip}
-  Branches match specific shapes of data; only certain values can reach
-  each branch.
-  \textbf{Negation types} are needed to track what has already been
-  eliminated.
-\end{block}
+\textbf{\color{darkslateblue}The challenge: dynamic code relies on idioms that classic
+type systems cannot describe}
 
 \end{frame}
 
@@ -88,7 +41,7 @@ patterns that traditional type systems cannot describe:
 % language tag in the top right corner of TypeScript code boxes (put at the end of the first line)
 \newcommand{\tsLabel}{\hfill\textcolor{gray}{\sffamily{\scriptsize T}{\tiny YPE}{\scriptsize S}{\tiny CRIPT}}}% faked small caps: the sans font (Carlito) has none
 \begin{frame}[fragile]\transdissolve
-\frametitle{1. Branching and discriminated unions}
+\frametitle{1. Branching and discriminated unions}\vspace{-4mm}
 \begin{minted}[fontsize=\normalsize]{typescript}
 type Status = "success" | "error";!\tsLabel!
 function report(s: Status): number | string {
@@ -96,8 +49,7 @@ function report(s: Status): number | string {
   return "failed";
 }
 \end{minted}
-{\small\color{gray}\texttt{"success"} and \texttt{"error"} are types with one value; their union types the input,
-and the result is \texttt{number} or \texttt{string} depending on the branch\par}
+{\small\color{gray}The result is \texttt{number} or \texttt{string} depending on the branch\par}
 \pause
 \vspace{-2mm}
 \begin{minted}[fontsize=\normalsize]{typescript}
@@ -107,63 +59,27 @@ type Payment = !\tsLabel!
 \end{minted}
 \vspace{-1mm}%
 {\small\color{gray}A \emph{discriminated union}: the field \texttt{kind} tells which variant a payment is\par}
+\pause
+\begin{exampleblock}{$\Rightarrow$ Union and singleton types are needed}
+\pb{"success"}, \pb{"error"}, \pb{"card"}: types with one value;\quad \pb{Status}, \pb{Payment}: their unions
+\end{exampleblock}
 \end{frame}
 
 
 
 \begin{frame}[fragile]\transdissolve
-  \frametitle{2. Overloading: basic use}
- \structure{\bf Aka \emph{ad hoc} polymorphism: functions that execute different code on arguments of different types}
-
+\frametitle{2. Overloading}
+\structure{\bf Aka \emph{ad hoc} polymorphism: functions that execute different code on arguments of different types}
 
 \begin{minted}{typescript}
 function double (x) {!\tsLabel!
     return (typeof(x) === "number") ? 2*x : x.concat(x);
 }
 \end{minted}
-\textcolor<3>{red}{If applied to a number returns a number, if applied to a string returns a string}
-  \pause
-\begin{exampleblock}{Use set-theoretic types}
-  \begin{itemize}
-     \item Naive solution, union types:\quad \pb{(number$\vee$string)$\to$(number$\vee$string)}\\
-       {\small\color{gray}\alt<5->{\pb{double(42)} has type \pb{number}, so \pb{double(42)+1} is accepted}{\pb{double(42)} has type \pb{number$\vee$string}, so \pb{double(42)+1} is rejected}}
-       \pause\pause
-     \item Better solution, intersection types:\quad \pb{(number$\to$number) $\wedge$ (string$\to$string)}
-  \end{itemize}
-\end{exampleblock}
-\end{frame}
-
-
-% overlay commands for the code below (beamer overlay specs do not work inside minted escapes)
-\newcommand{\tbTest}{\alert<3->{toBoolean(x)}}
-\newcommand{\tbThen}{\visible<3->{\textcolor{gray}{\slash\slash{} here x : Truthy}}}
-\newcommand{\tbElse}{\visible<3->{\textcolor{gray}{\slash\slash{} here x : Falsy}}}
-% syntax coloring of types, same colors as the Elixir type slides (setup.sty)
-\newcommand{\scT}[1]{\textcolor{\pickedColor}{#1}}% type names, arrows, quantifier
-\newcommand{\scO}[1]{\textcolor{\otherColor}{#1}}% set-theoretic connectives
-\newcommand{\scV}[1]{\textcolor{typeBlue}{#1}}% singleton values
-\newcommand{\scX}[1]{\textcolor{typeBrique}{#1}}% type variables
-\begin{frame}[fragile]
-\frametitle{2. Overloading: advanced use}\vspace{-7mm}
-\begin{minted}[escapeinside=!!,breaklines=false,breakanywhere=false,fontsize=\footnotesize]{typescript}
-function toBoolean(x) {!\tsLabel!
-    if (x === false || x === 0 || x === "" ||
-        x == null || Number.isNaN(x)) return false;
-    return true;
-}
-function logicalOr(x, y) {
-    if (!\tbTest!) return x;   !\tbThen!
-    return y;                     !\tbElse!
-}
-\end{minted}
-\vspace{-5mm}
-
-\begin{exampleblock}<2->{Narrowing on the result of an application}\small
-{\tt
-\ty{} \scT{Falsy} = \scV{false}\scO{$\,\vee\,$}\scV{0}\scO{$\,\vee\,$}\scV{""}\scO{$\,\vee\,$}\scV{null}\scO{$\,\vee\,$}\scV{undefined}\scO{$\,\vee\,$}\scV{NaN};\qquad\quad \ty{} \scT{Truthy} = \scO{$\neg$}\scT{Falsy};\\
-toBoolean : (\scT{Truthy} \scT{$\to$} \scV{true}) \scO{$\wedge$} (\scT{Falsy} \scT{$\to$} \scV{false})\par}
-\uncover<3->{\textbf{\color{darkslateblue}\texttt{toBoolean(x)} is an application, not a type test: its intersection type narrows \texttt{x}}\par}
-\uncover<4->{\tt logicalOr : \scT{$\forall$}\scX{$\alpha$},\scX{$\beta$}. ((\scX{$\alpha$}\scO{$\wedge$}\scT{Truthy}, \scT{Any}) \scT{$\to$} \scX{$\alpha$}) \scO{$\wedge$} ((\scT{Falsy}, \scX{$\beta$}) \scT{$\to$} \scX{$\beta$})\par}
+If applied to a number returns a number, if applied to a string returns a string
+\pause
+\begin{exampleblock}{$\Rightarrow$ Intersection types are needed}
+\pb{double : (number$\to$number) $\wedge$ (string$\to$string)}
 \end{exampleblock}
 \end{frame}
 
@@ -192,9 +108,9 @@ $}
 
 
 \begin{frame}
-\frametitle{3. Precise typing of pattern matching (II)}\xdef\matchframenumber{\insertframenumber}% referenced in core.tex\transdissolve<4>
+\frametitle{3. Precise typing of pattern matching (II)}\xdef\matchframenumber{\insertframenumber}\transdissolve<4>% \matchframenumber is referenced in core.tex
 
-\textbf{Boolean type connectives are needed to type pattern matching:}
+\textbf{\color{darkslateblue}Boolean type connectives are needed to type pattern matching:}
 
 \smallskip
 
@@ -202,22 +118,16 @@ $}
 
    \smallskip
 
-Suppose that $\Bl e:\T$\\[-2mm]
-
-
-  - To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \accept{p_1}$};
-
-
-  - To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\,\backslash \accept{p_1})\And \accept{p_2}$;}\hspace*{18mm} {\textcolor{gray}{\small($\texttt{S}\setminus\T$ stands for $\texttt{S}\!{\And}\!\neg{\T}$)}}
-
+Suppose that $\Bl e:\T$\vspace{2mm}
+{\setlength{\leftmargini}{0.75em}\setlength{\labelsep}{0.3em}%
+\begin{itemize}\setlength{\topsep}{3.5mm}\setlength{\itemsep}{0.2mm}
+\item To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \accept{p_1}$};
+\item To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\setminus \accept{p_1})\And \accept{p_2}$;}\hfill{\textcolor{gray}{\small($\texttt{S}\setminus\T = \texttt{S}\!{\And}\!\neg{\T}$: negation)}}
 \pause
-
-  - The type of the match expression is {\color{blue}$\T_1\Or \T_2$}.
-
-
-  - Pattern matching is exhaustive if $\color{blue}\T\leq\accept{p_1}\Or \accept{p_2}$.
-
-
+\item The type of the match expression is {\color{blue}$\T_1\Or \T_2$}.
+\item Pattern matching is exhaustive if $\color{blue}\T\leq\accept{p_1}\Or \accept{p_2}$.
+\end{itemize}}
+\vspace{-1mm}
 \pause
 \textbf{Formally:}
 \vspace{-2mm}

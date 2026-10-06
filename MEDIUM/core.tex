@@ -10,10 +10,9 @@
 \frametitle{Putting the theory to work: Elixir}\vspace{-3mm}
 \begin{block}{The language}
 \begin{itemize}
-\item Dynamic and functional, Ruby-like syntax, strong emphasis on metaprogramming
-\item Runs on the Erlang VM: distributed and fault-tolerant applications
-\item Rich ecosystem of libraries and frameworks, nearly 100K developers
-\item In production at Apple, Discord, PepsiCo, BBC, Adobe, Spotify, \ldots
+\item Dynamic and functional, Ruby-like syntax, extensive metaprogramming
+\item Runs on the Erlang VM: distributed, fault-tolerant applications
+\item Nearly 100K developers; used by Adobe, Apple, BBC, Discord, PepsiCo, Spotify, \ldots
 \end{itemize}
 \end{block}
 
@@ -27,8 +26,7 @@
 \end{frame}
 
 
-\subsection{Simple function types}
-
+\subsection{Unions, intersections, negations}
 
 % compiler output (abridged from Elixir 1.20.4)
 \DefineVerbatimEnvironment{warnverbatim}{Verbatim}{
@@ -39,37 +37,24 @@
 }
 \newcommand{\warn}{\textcolor{typeOrange}{warning:}}
 
-\begin{frame}[fragile,t]
-\frametitle{Static typing 101}
-\begin{block}{A function that always fails}
-\begin{minted}[escapeinside=!!]{elixir}
-def negate(x) when is_integer(x), do: not x
-\end{minted}
-\end{block}\pause
-\begin{block}{Type error}
-\begin{warnverbatim}
-\warn incompatible types given to Kernel.not/1:
-    not x
-given types:
-    integer()
-but expected one of:
-    true
-    false
-\end{warnverbatim}
-\end{block}
-{\small\color{gray}Elixir reports type violations as warnings, so compilation is never interrupted.\par}
-\end{frame}
-
-
-
-% \defverbatim[colored]{\intToInt}{
-% \begin{minted}{elixir}
-% !\spec! !\po!integer() !\arr! integer()!\pc!
-% \end{minted}
-% }
 \defverbatim[colored]{\intToInt}{
 \begin{coloredverbatim}
 $ (integer() -> integer())
+\end{coloredverbatim}
+}
+\defverbatim[colored]{\intBool}{
+\begin{coloredverbatim}
+$ (integer() \oor boolean()) -> (integer() \oor boolean())
+\end{coloredverbatim}
+}
+\defverbatim[colored]{\intersection}{
+\begin{coloredverbatim}
+$ (integer()->integer()) \oand (boolean()->boolean())
+\end{coloredverbatim}
+}
+\defverbatim[colored]{\subtractSig}{
+\begin{coloredverbatim}
+$ (integer(), integer() -> integer())
 \end{coloredverbatim}
 }
 \defverbatim[colored]{\negateInt}{
@@ -77,82 +62,27 @@ $ (integer() -> integer())
 def negate(x) when is_integer(x), do: -x
 \end{minted}
 }
-
-\begin{frame}[fragile,t]
-\frametitle{Types as contracts between functions}
-\begin{block}{Function A: negate}
-\visible<2->{%
-\intToInt
-}
-\vspace{-2mm}
-\negateInt
-\vspace{-1.8mm}
-\end{block}
-\visible<2->{{\small\color{gray}\texttt{\$} introduces a type signature. Elixir writes
-\texttt{or}, \texttt{and}, \texttt{not}, \texttt{term()}, \texttt{none()} for
-$\vee$, $\wedge$, $\neg$, $\Any$, $\Empty$.\par}}
-\pause\pause
-\begin{block}{Function B: subtract}
-\vspace{-1mm}
-\begin{coloredverbatim}
-$ (integer(), integer() -> integer())
-\end{coloredverbatim}
-\vspace{-2mm}
-\begin{minted}[escapeinside=!!]{elixir}
-def subtract(a, b) when is_integer(a) and is_integer(b) do
-    a + negate(b)
-end
-\end{minted}
-\end{block}
-\pause
-\textbf{\color{darkslateblue}What if we modify the implementation of \code{negate}?}
-% \begin{block}{Answer}
-% If the implementation of \code{negate} changes and violates the type contract, it could lead to unexpected behavior or errors in the \code{subtract} function. Ensuring that the contract is maintained helps guarantee the correctness of our code.
-% \end{block}
-\end{frame}
-
-\defverbatim[colored]{\intBool}{
-\begin{coloredverbatim}
-$ (integer() \oor boolean()) -> (integer() \oor boolean())
-\end{coloredverbatim}
-}
 \defverbatim[colored]{\negateBool}{
 \begin{minted}{elixir}
 def negate(x) when is_boolean(x), do: not x
 \end{minted}
 }
 
-
-
-\subsection{Unions, intersections, negations}
-
-\defverbatim[colored]{\intersection}{
-\begin{coloredverbatim}
-$ (integer()->integer()) \oand (boolean()->boolean())
-\end{coloredverbatim}
-}
-
-\begin{frame}[fragile,t]{Overloading in Elixir: union vs.\ intersection}\transdissolve<5>
+\begin{frame}[fragile,t]{Types as contracts: union vs.\ intersection}\transdissolve<6>
 \vspace{-2mm}
-\begin{block}{Adding a clause for booleans}
+\begin{block}{\alt<4->{Adding a clause for booleans}{Function A: negate}}
 \visible<2->{%
-\alt<5->{\intersection}{\intBool}%
+\alt<6>{\intersection}{\alt<4->{\intBool}{\intToInt}}%
 }
 \vspace{-2.1mm}
 \negateInt
 \vspace{-2.1mm}
-\negateBool
+\visible<4->{\negateBool}
 \vspace{-2.2mm}
 \end{block}
-\pause\pause
-
-\vspace{-5mm}
-
-\begin{block}{\vspace{-5mm}}
-\vspace{-0.2mm}
-\begin{coloredverbatim}
-$ (integer(), integer() -> integer())
-\end{coloredverbatim}
+\begin{block}{Function B: subtract}
+\vspace{-1mm}
+\visible<2->{\subtractSig}
 \vspace{-2.1mm}
 \begin{minted}[escapeinside=!!]{elixir}
 def subtract(a, b) when is_integer(a) and is_integer(b) do
@@ -160,19 +90,26 @@ def subtract(a, b) when is_integer(a) and is_integer(b) do
 end
 \end{minted}
 \end{block}
-\pause
-\begin{onlyenv}<4>
-\begin{block}{Type error in subtract}
+\begin{onlyenv}<2-3>
+{\small\color{gray}\texttt{\$} introduces a type signature. Elixir writes
+\texttt{or}, \texttt{and}, \texttt{not}, \texttt{term()}, \texttt{none()} for
+$\vee$, $\wedge$, $\neg$, $\Any$, $\Empty$.\par}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\smallskip
+\textbf{\color{darkslateblue}What if we modify the implementation of \code{negate}?}
+\end{onlyenv}
+\begin{onlyenv}<5>
+\begin{block}{Type warning in subtract {\normalfont\small(warnings never stop compilation)}}
 \begin{warnverbatim}
-\warn incompatible types given to Kernel.+/2:
-    a + negate(b)
+\warn incompatible types given to Kernel.+/2: a + negate(b)
 given types: integer(), integer() or boolean()
 but expected one of: integer(), integer()  ...
 \end{warnverbatim}
-\vspace{-1.5mm}
+\vspace{-2.5mm}
 \end{block}
 \end{onlyenv}
-\begin{onlyenv}<5>
+\begin{onlyenv}<6>
 \textbf{\color{darkslateblue}With the intersection type, \code{subtract} type checks}
 \end{onlyenv}
 \end{frame}
@@ -194,7 +131,7 @@ $ (false \oor nil -> true) \oand
 \vspace{-9mm}
 \begin{overlayarea}{\textwidth}{0.5mm}%
     \only<2>{\lognegSingle}
-\only<3>{\lognegType}
+\only<3->{\lognegType}
 \end{overlayarea}%
 \hfill \vspace{1mm}
 \begin{minted}[escapeinside=||]{elixir}
@@ -203,12 +140,20 @@ def logical_neg(x), do: false
 \end{minted}
 \end{block}
 \pause
-\begin{block}{As for \texttt{toBoolean} in TypeScript}
 \begin{itemize}
-    \item \code{false or nil} is Elixir's \textsf{Falsy}: a union of singleton types
-    \visible<3->{\item \code{not (false or nil)} is Elixir's \textsf{Truthy}: a negation type}
+    \item \code{false or nil}: the values Elixir treats as false (\emph{falsy}), a union of singleton types
+    \visible<3->{\item \code{not (false or nil)}: all other values (\emph{truthy}), a negation type}
 \end{itemize}
+\begin{block}<4->{Narrowing on the result of an application}
+\begin{minted}{elixir}
+def succ(x) when is_integer(x) or is_nil(x) do
+  if logical_neg(x), do: 0,        # x : nil
+                     else: x + 1   # x : integer()
+end
+\end{minted}
+\vspace{-1mm}
 \end{block}
+\uncover<4->{\textbf{\color{darkslateblue}The intersection type of \code{logical_neg} narrows \code{x} in each branch}}
 
 \end{frame}
 
@@ -277,7 +222,7 @@ $ ((false \oor nil, a) -> a) \oand
 
 \begin{frame}[fragile]{Intersection and polymorphism}\transdissolve<4->
 
-\begin{block}{Logical OR (\texttt{logicalOr} in TypeScript)}%
+\begin{block}{Logical OR}%
 \vspace{-7mm}
 \begin{overlayarea}{\textwidth}{2mm}
     \only<2>{\logorFirst}
@@ -291,7 +236,7 @@ def logical_or(x, _), do: x
 \end{minted}
 \end{block}
 \pause\pause\pause\pause
-\textbf{\color{darkslateblue}Bounded polymorphism} {\small\color{gray}($t,u$ types; $u=\textsf{Truthy}$ gives the $\alpha\wedge\textsf{Truthy}$ of \texttt{logicalOr})}
+\textbf{\color{darkslateblue}Bounded polymorphism} {\small\color{gray}($t,u$ types; for \texttt{b} in \texttt{logical\_or}, $u$ is \texttt{not(false or nil)})}
 \[\color{typeBrique}\forall (\alpha{\leq} u).t \quad\stackrel{\text{def}}{=}\quad \forall \alpha.\,t[\alpha:=\alpha{\wedge} u]\]
 \only<4>{\begin{textblock}{5}(0,0)
 \includegraphics[scale=1]{images/hw-bounded_q.pdf}
@@ -377,15 +322,19 @@ Same recipe as for patterns (slide~\matchframenumber): clause $i$ receives the i
 \textbf{minus} those \surely{surely accepted} by the previous clauses,
 \textbf{and} \possibly{possibly accepted} by its own guard.
 \only<1>{\begin{textblock}{11}(2.5,5.9)
-\fcolorbox{gray!60}{white}{\includegraphics[width=10.8cm,trim=26 18 30 102,clip]{images/recall-match.pdf}}% slide 8, last overlay (pdfseparate of main.pdf)
+\fcolorbox{gray!60}{white}{\includegraphics[width=10.8cm,trim=26 18 30 102,clip]{images/recall-match.pdf}}% last overlay of the [Match] frame (pdfseparate of main.pdf)
 \end{textblock}}%
 \only<2-3>{\begin{textblock}{11}(2.5,5.9)
 \fcolorbox{gray!60}{white}{\scalebox{0.773}{\begin{minipage}[t][135pt]{397.5pt}% same size as the screenshot above
-\vspace*{5.45pt}\hspace*{1.5mm}% aligned with the screenshot
-- To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \PA{p_1}$};\\
-\hspace*{1.5mm}- To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\setminus \SA{p_1})\And \PA{p_2}$};\\
-\hspace*{1.5mm}- The type of the match expression is {\color{blue}$\T_1\Or \T_2$}.\\
-\hspace*{1.5mm}- Pattern matching is exhaustive if $\color{blue}\T\leq\PA{p_1}\Or \PA{p_2}$.\\
+\vspace*{4.4pt}% aligned with the screenshot
+{\setlength{\leftmargini}{\dimexpr0.75em+1.5mm}\setlength{\labelsep}{0.3em}%
+\begin{itemize}\setlength{\topsep}{0pt}\setlength{\itemsep}{0.2mm}
+\item To infer the type $\Bl\T_1$ of $\Bl e_1$ we need {\color{blue}$\T\And \PA{p_1}$};
+\item To infer the type $\Bl\T_2$ of $\Bl e_2$ we need {\color{blue}$(\T\setminus \SA{p_1})\And \PA{p_2}$};
+\item The type of the match expression is {\color{blue}$\T_1\Or \T_2$}.
+\item Pattern matching is exhaustive if $\color{blue}\T\leq\PA{p_1}\Or \PA{p_2}$.
+\end{itemize}}
+\vspace{-4.6pt}
 \hspace*{1.5mm}\textbf{Formally:}\hfill{\small $\color{typeGreen}\pmb{\lfloor} p\pmb{\rfloor}$: \surely{surely accepted}, $\color{typeOrange}\pmb{\lceil} p\pmb{\rceil}$: \possibly{possibly accepted} by $p$ and its guard}
 \vspace{-2mm}
 \begin{mathpar}\Bl
@@ -449,12 +398,11 @@ def f(x) when (is_map(x) and map_size(x) == 2) or is_list(x), do: ...
 \begin{frame}[fragile,t]\transdissolve<5-6>
 \frametitle{Narrowing: each clause sees a more precise type}
 \vspace{-2mm}
-\begin{block}{\vspace{-5mm}}
+\begin{block}{A response type}
 \result
 \end{block}
 \begin{onlyenv}<-5>
-\vspace{-4mm}
-\begin{block}{\vspace{-5mm}}
+\begin{block}{Handling a response}
 \begin{minted}[escapeinside=||,fontsize=\footnotesize]{elixir}
 |\spec| response() -> _
 def handle(r) when r.output == :ok, do: {:accepted, r.socket}
@@ -474,15 +422,14 @@ clause & type of \texttt{r} & result\\\hline
 \end{tabular}\par}
 \end{onlyenv}
 \begin{onlyenv}<5>
-\begin{block}{Each row is an arrow: the inferred type of \code{handle}}
+\begin{exampleblock}{Each row is an arrow: the inferred type of \code{handle} {\normalfont\small(only the input type was declared)}}
 \begin{minted}[fontsize=\footnotesize,escapeinside=||]{elixir}
 |\spec| (%{output: :ok, socket: socket()} -> {:accepted, socket()}) and
   (%{output: :error, message: :timeout} -> :timeout) and
   (%{output: :error, message: {:delay, integer()}} -> {:retry, integer()})
 \end{minted}
 \vspace{-1mm}
-\end{block}
-{\small\color{gray}We declared only the input type, \texttt{response()}: the rest is inferred.\par}
+\end{exampleblock}
 \end{onlyenv}
 \begin{onlyenv}<6>
 \begin{block}{A bug caught by narrowing (Elixir 1.20)}
@@ -521,24 +468,24 @@ The guard is split into its \texttt{or} branches; the body is typed once per bra
 \end{tabular}\par}
 \pause\pause
 \begin{onlyenv}<-4>
-\begin{block}{Inferred type: the intersection of the two arrows}
+\begin{exampleblock}{Inferred type: the intersection of the two arrows}
 \begin{coloredverbatim}
 $ (boolean(), term() -> \{term(), boolean()\}) \oand
   (term(), integer() -> \{integer(), term()\})
 \end{coloredverbatim}
 \vspace{-1mm}
-\end{block}
+\end{exampleblock}
 {\small\color{gray}Branches are analyzed in evaluation order: swapping the operands of
 \texttt{or} can change the arrows.\par}
 \end{onlyenv}
 \begin{onlyenv}<5>
-\begin{exampleblock}{What it allows to type}
+\begin{block}{What it allows to type}
 \begin{minted}[fontsize=\footnotesize]{elixir}
 {n, b} = baz(true, 2)   # both arrows apply: {integer(), boolean()}
 {n + 1, not b}          # accepted (with one arrow: n, b : term(), rejected)
 \end{minted}
 \vspace{-1mm}
-\end{exampleblock}
+\end{block}
 \end{onlyenv}
 \end{frame}
 
