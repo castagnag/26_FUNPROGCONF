@@ -1,0 +1,48 @@
+% Backup material: keep appendix frames unnumbered.
+\begin{frame}[t,noframenumbering,label=perf-propagation]
+\frametitle{Removing dynamic propagation}
+\textbf{Compile the same 17 projects with and without propagation}
+
+\bigskip
+\begin{columns}[c,onlytextwidth]
+  \begin{column}{0.66\textwidth}
+    \begin{tikzpicture}[x=0.027cm,y=1cm]
+      \node[anchor=east,font=\small] at (-5,1.1) {Full checker};
+      \node[anchor=east,font=\small,align=right] at (-5,0) {Without dynamic\\propagation};
+      \fill[darkslateblue] (0,0.88) rectangle (94,1.32);
+      \fill[darkslateblue] (0,-0.22) rectangle (94,0.22);
+      \fill[typeOrange] (94,-0.22) rectangle (158,0.22);
+      \node[anchor=west,font=\small\bfseries] at (97,1.1) {94};
+      \node[anchor=west,font=\small\bfseries] at (161,0) {158};
+      \draw[gray!65] (0,-0.65) -- (160,-0.65);
+      \foreach \n in {0,80,160} {
+        \draw[gray!65] (\n,-0.65) -- (\n,-0.72);
+        \node[anchor=north,font=\scriptsize,text=gray] at (\n,-0.76) {\n};
+      }
+      \node[anchor=north,font=\small] at (80,-1.12) {Project type warnings};
+    \end{tikzpicture}
+  \end{column}
+  \begin{column}{0.29\textwidth}
+    {\fontsize{32}{36}\selectfont\bfseries\color{typeOrange}+64\par}
+    \smallskip
+    \textbf{additional warnings}\par
+    \medskip
+    {\small Six projects are unchanged.\par}
+  \end{column}
+\end{columns}
+
+\medskip
+{\small Dynamic propagation avoids requiring extra checks on results of
+function calls in existing code.\par}
+
+\note{Source: evaluation.tex, lines 260--333, table \texttt{dynamic\_propagation\_removal}.
+  Full checker: 94 project type warnings. Static variant: 158. Difference:
+  64, or approximately 68 percent. Warnings from dependencies are excluded.
+  The paper's static variant suppresses the dynamic component propagated
+  through strong applications, replacing t and dynamic() with t. These are
+  warning counts, not a validated count of additional bugs or false positives.
+  The six unchanged projects are HexPm, Ecto, Phoenix, MixSBOM, Nerves, and
+  AbsintheFederation. For example, using a returned integer-or-Boolean in
+  addition may require an explicit \texttt{is\_integer} check without propagation.
+  Reproduction artifacts: https://github.com/gldubc/core-elixir-experiments.}
+\end{frame}
