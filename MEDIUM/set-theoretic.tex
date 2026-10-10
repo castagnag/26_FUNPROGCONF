@@ -22,7 +22,7 @@
     \item \textbf{Needed}: a type system that is \textbf{sound},
           \textbf{gradual}, \textbf{automated}, and \textbf{open}
   \end{itemize}
-\end{block}
+\end{block}\pause
 \setbeamercolor{block body alerted}{bg=red!8}
 \begin{alertblock}{Regulatory compliance}\setlength{\baselineskip}{0.85\baselineskip}
   EU and US regulations increasingly \textbf{require evidence of
@@ -135,7 +135,7 @@ To type $\Bl e_2$ we remove from $\Bl\T$ the values accepted by $\Bl p_1$:\quad
 \end{frame}
 
 \subsection{Semantic subtyping}
-\begin{frame}
+\begin{frame}\transdissolve<2->
 \frametitle{Semantic subtyping}\vspace{-4mm}
 
 Unions and intersections are common (TypeScript, Python, Scala); negations are rare.
@@ -162,7 +162,7 @@ Unions and intersections are common (TypeScript, Python, Scala); negations are r
         \item Derive algorithms to decide $\leq$ and compute type operators
       \end{enumerate}
     \end{block}
-  \end{column}
+  \end{column}\pause[5]%
   \begin{column}{0.39\textwidth}
     \begin{block}{Why not subtyping rules?}
       Rule-based systems end up incomplete and fragile: e.g.,\\[1mm]

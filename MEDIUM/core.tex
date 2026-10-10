@@ -68,7 +68,7 @@ def negate(x) when is_boolean(x), do: not x
 \end{minted}
 }
 
-\begin{frame}[fragile,t]{Types as contracts: union vs.\ intersection}\transdissolve<6>
+\begin{frame}[fragile,t]{Types as contracts: union vs.\ intersection}\transdissolve<4,6>
 \vspace{-2mm}
 \begin{block}{\alt<4->{Adding a clause for booleans}{Function A: negate}}
 \visible<2->{%
@@ -317,7 +317,7 @@ Two types approximate them:
 \end{frame}
 
 \begin{frame}[fragile,t]
-\frametitle{Dead clauses and exhaustiveness}\transdissolve<2,6-7>
+\frametitle{Dead clauses and exhaustiveness}\transdissolve<2-3,6-7>
 Same recipe as for patterns (slide~\matchframenumber): clause $i$ receives the input values
 \textbf{minus} those \surely{surely accepted} by the previous clauses,
 \textbf{and} \possibly{possibly accepted} by its own guard.
