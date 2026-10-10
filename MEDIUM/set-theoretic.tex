@@ -6,13 +6,13 @@
 %% ----------------------------------------------------------
 %%  SLIDE 2 — Why static typing for dynamic languages?
 %% ----------------------------------------------------------
-\begin{frame}
+\begin{frame}\transdissolve
 \frametitle{Why static typing for dynamic languages?}
 
 \vspace{-3mm}
 \small
 \begin{block}{Static types for dynamic languages}\setlength{\leftmargini}{1.2em}
-  \begin{itemize}\setlength{\itemsep}{3pt}
+  \begin{itemize}\setlength{\itemsep}{1pt}
     \item \textbf{Catch bugs early} and enable \textbf{tooling}: completion,
           navigation, safe refactoring
     \item \textbf{Checked documentation}: types state what functions expect and
@@ -26,14 +26,13 @@
 \setbeamercolor{block body alerted}{bg=red!8}
 \begin{alertblock}{Regulatory compliance}\setlength{\baselineskip}{0.85\baselineskip}
   EU and US regulations increasingly \textbf{require evidence of
-  software assurance} (CRA, NIST guidelines, \ldots). A
+  software assurance} (CRA, NIST, \ldots). A
   \emph{sound} type system is a mechanically verifiable step in that direction,
   also for AI-generated code.
-\end{alertblock}
-
-\textbf{\color{darkslateblue}The challenge: dynamic code relies on idioms that classic
-type systems cannot describe}
-
+\end{alertblock}\vspace{-4mm}\pause
+\begin{exampleblock}{\vspace{-3mm}}{\centerline{\bf The challenge: dynamic code relies on idioms that classic
+type systems cannot describe}}
+\end{exampleblock}
 \end{frame}
 
 \subsection{Branching, overloading, and pattern matching}
@@ -90,7 +89,7 @@ If applied to a number returns a number, if applied to a string returns a string
 \begin{frame}
 \frametitle{3. Precise typing of pattern matching}\xdef\matchframenumber{\insertframenumber}\transdissolve<5>% \matchframenumber is referenced in core.tex
 
-\textbf{\color{darkslateblue}Accepted type of a pattern $p$:} {\color{magenta}$\accept{p} = \{ v\mid v\text{ matches }p\}$}, e.g., $\Bl\accept{\patpair{x}{y}}=\pair\Any\Any$
+\textbf{\color{darkslateblue}Accepted \textcolor{blue}{type} of a pattern $p$:} {\color{magenta}$\accept{p} = \{ v\mid v\text{ matches }p\}$}, e.g., $\Bl\accept{\patpair{x}{y}}=\pair\Any\Any$
 
 \smallskip
 
