@@ -5,7 +5,7 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Gradual typing: no big-bang migration}\transdissolve<2>
+\frametitle{Gradual typing: no big-bang migration}
 \textbf{\color{darkslateblue}Two non-negotiable requirements for real-world adoption by existing languages:}\\
 \textbf{\hspace*{.4mm}1.} You do not have to type-annotate your entire codebase at once.\\
 \textbf{2.} Types do not modify the run-time semantics of existing programs.
@@ -18,15 +18,10 @@
 \item May turn into any other type at runtime: typed and untyped code coexist
       seamlessly
 \item Offers a more relaxed type safety guarantee:\\
- \color<2>{purple}If some program \code{e} has type \code{integer()} and evaluates to a value, \\
+ If some program \code{e} has type \code{integer()} and evaluates to a value, \\
       then this value is of type \code{integer()}.
 \end{itemize}
 \end{block}
-\pause\vspace{-4mm}
-\begin{exampleblock}{\vspace{-5mm}}
-\centering\bf  Same guarantees as \emph{sound gradual typing} but {\color{purple}without inserting
-  casts at compilation}
-\end{exampleblock}
 
 \end{frame}
 %%% def boolean_id(x), do: x

@@ -38,16 +38,6 @@ given types: integer(), dynamic(boolean())   \textcolor{gray}{(i.e., boolean() a
 planned after efficient recursive and parametric types, map traversal, and typed structs are implemented.\par}
 \end{frame}
 
-\begin{frame}
-\frametitle{Status of the integration}\vspace{-4mm}
-\begin{itemize}\setlength{\itemsep}{0pt}
-\item v1.17 (June 2024): gradual set-theoretic types for atoms, maps, basic types
-\item v1.18: type-checked function calls, inference for patterns and return types
-\item v1.19 (Oct.\ 2025): all constructs; function types; \textit{protocols} (\`a la type classes)
-\item \textbf{v1.20 (June 2026, now 1.20.4): typing covers the whole language}: full guard analysis, intersection types inferred for multi-clause functions
-\end{itemize}
-\end{frame}
-
 % Empirical results for Guillaume's part; timing table moved to a chart.
 \input{performance}
 
@@ -72,42 +62,6 @@ planned after efficient recursive and parametric types, map traversal, and typed
 \end{block}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{\mbox{Several languages use (more or less) semantic subtyping}}
-\hspace*{-0.8em}%
-\begin{minipage}{1.06\textwidth}
-  \setlength{\leftmargini}{1.9em}
-\begin{itemize}\setlength{\itemsep}{2pt}  \setlength{\rightmargin}{-12pt} % reduce right margin (use full width)
-
-  \item \textbf{Elixir} — in the compiler since v1.17 (2024), whole
-        language since v1.20 (2026)
-        % (Discord, Pinterest,PepsiCo, \ldots)
-
-  \item \textbf{Python (\textsf{ty})} — Astral's high-performance type
-        checker reuses data-structures and optimisations developed for
-        Elixir, and is migrating to a full semantic subtyping implementation.
-
-  \item \textbf{Ballerina} (WSO2) — uses semantic subtyping since its
-        Swan Lake release
-
-  \item \textbf{Luau} (Roblox) — falls back to semantic subtyping when
-        syntactic subtyping is insufficient
-
-  \item \textbf{Erlang} — \emph{RPTU} (Kaiserslautern) develops \textsl{Ethylizer} which reconstructs set-theoretic types  for unannotated
-        code by using our semantic subtyping algorithms and techniques; \\
-        \emph{Meta} develops \textsl{eqWAlizer} to type WhatsApp's Erlang codebase, building on our semantic-subtyping-based gradual typing.
-
-  \item \textbf{R} — \emph{U.\ Karlova} (Prague) is developing a type system for R
-        based on semantic subtyping
-
-  \item \textbf{Julia} — core developers cite semantic subtyping as
-        direct inspiration for Julia's type system
-
-  \item \textbf{CDuce} and its spin-offs SSTT and MLsem — the original
-        theoretical proving grounds
-\end{itemize}
-\end{minipage}
-\end{frame}
 
 
 % Future work: one frame per topic, what fails today (Elixir 1.20.4, checked) and what the
@@ -234,6 +188,6 @@ m.b + 1                                 !\goodNum!
 \end{itemize}}
 \pause
 \smallskip
-{\centering\textbf{\color{darkslateblue}Set-theoretic types fit languages built on pattern matching:\\
+{\centering\textbf{\color{darkslateblue}Set-theoretic types fit dynamic languages built on pattern matching and guards:\\
 the theory is ready, and it runs in production.}\par}
 \end{frame}
