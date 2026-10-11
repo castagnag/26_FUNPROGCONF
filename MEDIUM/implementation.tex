@@ -77,11 +77,14 @@ planned after efficient recursive and parametric types, map traversal, and typed
 \newcommand{\fwToday}{\codeLabel{today (Elixir 1.20)}}
 \newcommand{\fwTomorrow}{\codeLabel{tomorrow}}
 \newcommand{\badRun}{\bad{crashes at run time}}
-\newcommand{\goodInit}{\good{error: \texttt{Counter} expects \texttt{:ok}}}
+\newcommand{\goodUnit}{\good{error: the \texttt{unit} of \texttt{Square} is \texttt{integer()}}}
 \newcommand{\goodSend}{\good{error: \texttt{true} is not an \texttt{integer()}}}
+\newcommand{\goodNotInt}{\good{error: \texttt{y} is not an \texttt{integer()}}}
 \newcommand{\goodKey}{\good{error: no key \texttt{:a}}}
 \newcommand{\goodNum}{\good{error: \texttt{m.b} is \texttt{:ok}, not a number}}
 
+% A direct Square.area("big") is already rejected by 1.20: the error escapes only because the
+% module is passed as a value. Tomorrow's syntax is the one of 26MEETUP_STOCKH_GIT/slidev.
 \begin{frame}[fragile,t]\transdissolve<2>
 \frametitle{Future work: typing modules}
 {\color{gray}Today the type \texttt{module()} says nothing about what a module implements\par}
@@ -89,26 +92,36 @@ planned after efficient recursive and parametric types, map traversal, and typed
 \begin{block}{\vspace{-5mm}}
 \begin{onlyenv}<1>
 \begin{minted}[escapeinside=||,fontsize=\normalsize]{elixir}
-defmodule Counter do                          |\fwToday|
-  @behaviour GenServer
-  def init(:ok), do: {:ok, %{}}
+defmodule Square do                           |\fwToday|
+  @behaviour Shape
+  def area(side), do: side * side
 end
-GenServer.start_link(Counter, :not_ok)  |\badRun|
+
+@spec compute(module(), term()) :: term()
+def compute(m, x), do: m.area(x)
+
+compute(Square, "big")          |\badRun|
 \end{minted}
 \end{onlyenv}
 \begin{onlyenv}<2>
 \begin{minted}[escapeinside=||,fontsize=\normalsize]{elixir}
-defmodule Counter do                          |\fwTomorrow|
-  |\newkw{\$behaviour}| GenServer|\newkw{[}|init_arg: :ok|\newkw{]}|
-  def init(:ok), do: {:ok, %{}}
+defmodule Square do                           |\fwTomorrow|
+  |\newkw{\$behaviour}| Shape|\newkw{[}|unit: integer()|\newkw{]}|
+  def area(side), do: side * side
 end
-GenServer.start_link(Counter, :not_ok)  |\goodInit|
+
+|\spec| (Shape|\newkw{[}|unit: a|\newkw{]}|, a) -> a |\when| a: term()
+def compute(m, x), do: m.area(x)
+
+compute(Square, "big")          |\goodUnit|
 \end{minted}
 \end{onlyenv}
 \end{block}
+\medskip
+{\small\color{gray}\texttt{Shape} is a \textit{behaviour}\alt<2>{ declaring a type parameter \texttt{unit} and \newkw{\texttt{\$callback}} \texttt{area(unit) = unit}}{ (an interface for modules) requiring \texttt{@callback area(term())::term()}}\par}
 \end{frame}
 
-\begin{frame}[fragile,t]\transdissolve<2>
+\begin{frame}[fragile,t]\transdissolve<2,3>
 \frametitle{Future work: typing processes}
 {\color{gray}Today the type \texttt{pid()} says nothing about the messages a process accepts\par}
 \bigskip
@@ -128,6 +141,15 @@ end)
 spawn(fn ->
   send(self(), true)                    |\goodSend|
   receive do y -> IO.puts(y + y) end
+end)
+\end{minted}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{minted}[escapeinside=||,fontsize=\normalsize]{elixir}
+|\newkw{\$interface}| boolean()                            |\fwTomorrow|
+spawn(fn ->
+  send(self(), true)
+  receive do y -> IO.puts(y + y) end    |\goodNotInt|
 end)
 \end{minted}
 \end{onlyenv}
